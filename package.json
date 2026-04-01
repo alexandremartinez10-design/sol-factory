@@ -1,0 +1,26 @@
+{
+  "name": "sol-factory",
+  "version": "0.1.0",
+  "description": "SolFactory NFT minting platform — Anchor + mpl-core",
+  "scripts": {
+    "build":   "anchor build",
+    "test":    "anchor test",
+    "deploy":  "anchor deploy",
+    "lint":    "prettier --check \"tests/**/*.ts\"",
+    "lint:fix": "prettier --write \"tests/**/*.ts\""
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/web3.js": "^1.98.0"
+  },
+  "devDependencies": {
+    "@types/bn.js":  "^5.1.6",
+    "@types/chai":   "^4.3.12",
+    "@types/mocha":  "^10.0.6",
+    "chai":          "^4.4.1",
+    "mocha":         "^10.4.0",
+    "ts-mocha":      "^10.0.0",
+    "typescript":    "^5.4.5",
+    "prettier":      "^3.3.0"
+  }
+}

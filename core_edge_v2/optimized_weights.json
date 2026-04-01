@@ -1,0 +1,14 @@
+{
+  "weights": {
+    "structure": 0.204137,
+    "ema": 0.292768,
+    "rsi": 0.158755,
+    "wick": 0.129172,
+    "volume": 0.215168
+  },
+  "metadata": {
+    "source": "walk_forward",
+    "n_folds": 3,
+    "last_fold_date": "2026-03-30"
+  }
+}

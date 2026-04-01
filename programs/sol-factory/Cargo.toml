@@ -1,0 +1,28 @@
+[package]
+name        = "sol-factory"
+version     = "0.1.0"
+description = "SolFactory — single-program NFT minting platform using mpl-core"
+edition     = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name       = "sol_factory"
+
+# Feature flags required by Anchor build pipeline
+[features]
+no-entrypoint  = []
+no-idl         = []
+no-log-ix-name = []
+cpi            = ["no-entrypoint"]
+default        = []
+
+[dependencies]
+# anchor 0.30.1 uses solana-program 1.18.x (monolithic, pre-SDK-split).
+# mpl-core 0.7.x also targets solana-program 1.18.x, so they share the same
+# Pubkey type and avoid the diamond-dependency conflict seen in 0.8.x/0.9.x.
+anchor-lang    = { version = "0.30.1", features = ["init-if-needed"] }
+solana-program = "=1.18.26"  # pin to anchor's exact version; provides pubkey! macro
+
+# mpl-core 0.7.x — latest release series before the Solana SDK split.
+# The "anchor" feature is safe here because both crates share solana-program 1.18.x.
+mpl-core = { version = "0.7.2", features = ["anchor"] }

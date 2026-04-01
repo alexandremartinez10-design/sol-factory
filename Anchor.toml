@@ -1,0 +1,32 @@
+[features]
+seeds     = true
+skip-lint = false
+
+# ── Program addresses ────────────────────────────────────────────────────────
+# Replace the placeholder with the real program ID after `anchor build`.
+[programs.localnet]
+sol_factory = "133wgvX88vqPu8qYEVm18aWgTn1CVtYjcEUXvmnyeWWN"
+
+[programs.devnet]
+sol_factory = "133wgvX88vqPu8qYEVm18aWgTn1CVtYjcEUXvmnyeWWN"
+
+[programs.mainnet]
+sol_factory = "133wgvX88vqPu8qYEVm18aWgTn1CVtYjcEUXvmnyeWWN"
+
+# ── Provider ─────────────────────────────────────────────────────────────────
+[provider]
+cluster = "Localnet"
+wallet  = "~/.config/solana/id.json"
+
+# ── Test runner ──────────────────────────────────────────────────────────────
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+# ── Local validator: clone mpl-core from mainnet so tests run offline ────────
+# anchor test --skip-local-validator  OR  anchor test (clones automatically)
+[[test.validator.clone]]
+address = "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+
+[test.settings]
+startup_wait  = 5000
+shutdown_wait = 2000

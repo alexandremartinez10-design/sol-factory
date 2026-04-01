@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background: #0a0a0a;
+  color: #ffffff;
+}
+
+/* ── Scrollbar ────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 2px; }
+
+/* ── Selection ────────────────────────────────── */
+::selection { background: rgba(124, 58, 237, 0.3); color: #ffffff; }
+
+/* ── Gradient text utility ────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #a78bfa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Gradient button ──────────────────────────── */
+.btn-primary {
+  @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white rounded-xl transition-all duration-200 overflow-hidden;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+}
+.btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* ── Ghost button ─────────────────────────────── */
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white rounded-xl border border-zinc-700 bg-zinc-900/50 transition-all duration-200;
+}
+.btn-ghost:hover { @apply border-purple-500 bg-zinc-800/60; }
+.btn-ghost:disabled { @apply opacity-40 cursor-not-allowed; }
+
+/* ── Card ─────────────────────────────────────── */
+.card {
+  @apply rounded-2xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm;
+}
+
+/* ── Input ────────────────────────────────────── */
+.input {
+  @apply w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/40 transition-colors text-sm;
+}
+
+/* ── Subtle glow on focused card ─────────────── */
+.glow-purple {
+  box-shadow: 0 0 40px rgba(124, 58, 237, 0.12), 0 0 80px rgba(168, 85, 247, 0.06);
+}

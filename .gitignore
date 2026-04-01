@@ -1,0 +1,39 @@
+# ── Secrets — NEVER commit these ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+platform-wallet.json
+*-wallet.json
+*.key
+*.pem
+keypair.json
+
+# ── Anchor / Solana build artefacts ──────────────────────────────────────────
+target/
+.anchor/
+**/*.so
+**/*.d.ts.map
+
+# ── Next.js ───────────────────────────────────────────────────────────────────
+frontend/.next/
+frontend/out/
+frontend/.vercel/
+
+# ── Node ─────────────────────────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ── OS / editors ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.log
+*.tmp
+core_edge.log

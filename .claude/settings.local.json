@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip --version)",
+      "Bash(pip3 --version)",
+      "Read(//c/Users/User/AppData/Local/Programs/Python//**)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Users/User/AppData/Local/Programs//**)",
+      "Bash(PYTHON=\"/c/Users/User/AppData/Local/Programs/Python/Python311/python.exe\" \"$PYTHON\" --version)",
+      "Bash(\"$PYTHON\" -m pip install --upgrade pip)",
+      "Bash(PYTHON=\"/c/Users/User/AppData/Local/Programs/Python/Python311/python.exe\")",
+      "Bash(\"$PYTHON\" -m pip install streamlit hyperliquid-python-sdk python-dotenv pandas numpy eth-account requests)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(python -c \"from ui import dashboard\")",
+      "Bash(python main.py)",
+      "Bash(python -c \":*)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":850\")",
+      "Bash(python tests/test_api_connection.py)",
+      "Bash(grep -v \"^$\")",
+      "Bash(powershell.exe -Command \"wsl --install -d Ubuntu\")",
+      "Bash(npm run:*)",
+      "Bash(powershell.exe -Command \"netstat -ano | findstr ''LISTENING'' | findstr '':300''\")",
+      "Bash(powershell.exe -Command \"Invoke-WebRequest -Uri ''http://localhost:3000/create?devnet=true'' -UseBasicParsing | Select-Object -ExpandProperty StatusCode\")",
+      "Bash(anchor build:*)",
+      "Read(//c/Users/User/.cargo/bin/**)",
+      "Read(//c/Users/User/**)",
+      "Bash(find /c/Users/User -name anchor* -maxdepth 5)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)"
+    ]
+  }
+}

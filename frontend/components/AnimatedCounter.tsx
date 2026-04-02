@@ -7,11 +7,11 @@ function random(min: number, max: number) {
 }
 
 export function AnimatedCounter() {
-  const [count, setCount] = useState<number>(random(12, 47));
+  const [count, setCount] = useState<number>(24); // stable SSR value, replaced on mount
   const [animating, setAnimating] = useState(false);
 
   useEffect(() => {
-    setCount(random(12, 47));
+    setCount(random(12, 47)); // immediately randomize on client mount
     const id = setInterval(() => {
       setAnimating(true);
       setTimeout(() => {

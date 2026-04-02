@@ -133,7 +133,7 @@ export interface InitCollectionParams {
  */
 export async function initializeCollection(
   params: InitCollectionParams
-): Promise<string> {
+): Promise<{ address: string; collectionMint: string }> {
   const { wallet, name, symbol, supply, mintPriceSol, metadataUri } = params;
 
   const collectionKeypair = Keypair.generate();

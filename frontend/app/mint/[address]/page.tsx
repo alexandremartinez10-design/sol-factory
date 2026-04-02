@@ -65,12 +65,13 @@ function MintContent({ address }: { address: string }) {
   // ── Mock collection for sim mode ─────────────────────────────────────────
   const mockCollection: CollectionInfo = {
     address,
-    name:           "Demo Collection",
-    symbol:         "DEMO",
-    supply:         100,
-    mintPrice:      0.05,
-    minted:         8,
-    collectionMint: address,
+    name:              "Demo Collection",
+    symbol:            "DEMO",
+    supply:            100,
+    mintPrice:         0.05,
+    minted:            8,
+    collectionMint:    address,
+    publicMintEnabled: true,
   };
 
   // ── Load collection from chain ────────────────────────────────────────────

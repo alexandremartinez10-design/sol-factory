@@ -25,4 +25,7 @@ pub enum SolFactoryError {
 
     #[msg("Collection account does not match collection state")]
     InvalidCollection,
+
+    #[msg("Public minting is currently disabled for this collection")]
+    PublicMintDisabled,
 }

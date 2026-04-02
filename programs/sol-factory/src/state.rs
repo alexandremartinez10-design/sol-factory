@@ -25,6 +25,10 @@ pub struct CollectionState {
     /// Bump for the ["authority", collection_mint] PDA that acts as
     /// the mpl-core collection update_authority (enables serverless minting)
     pub authority_bump: u8,
+    /// When false, the public mint_nft instruction is blocked.
+    /// Creator can still mint to any address via creator_mint_to.
+    /// Toggled by toggle_public_mint; initialised to true.
+    pub public_mint_enabled: bool,
 }
 
 impl CollectionState {
@@ -40,6 +44,7 @@ impl CollectionState {
         + 32                                        // creator   Pubkey
         + 32                                        // collection_mint Pubkey
         + 1                                         // bump
-        + 1;                                        // authority_bump
-    // Total: 148 bytes
+        + 1                                         // authority_bump
+        + 1;                                        // public_mint_enabled
+    // Total: 149 bytes
 }

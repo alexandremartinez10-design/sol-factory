@@ -21,6 +21,7 @@ default        = []
 # mpl-core 0.7.x also targets solana-program 1.18.x, so they share the same
 # Pubkey type and avoid the diamond-dependency conflict seen in 0.8.x/0.9.x.
 anchor-lang    = { version = "0.30.1", features = ["init-if-needed"] }
+proc-macro2    = "=1.0.86"
 solana-program = "=1.18.26"  # pin to anchor's exact version; provides pubkey! macro
 
 # mpl-core 0.7.x — latest release series before the Solana SDK split.

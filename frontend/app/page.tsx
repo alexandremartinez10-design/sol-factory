@@ -70,16 +70,25 @@ export default function HomePage() {
         </div>
 
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-[1.08] max-w-4xl mx-auto">
-          Launch your NFT collection
+          Pay 0.15 SOL once.
           <br />
-          <span className="gradient-text">in 60 seconds</span>
+          <span className="gradient-text">Keep 100% of your royalties. Forever.</span>
         </h1>
 
         <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto leading-relaxed">
-          No code. No setup. Just connect your wallet and go live instantly.
+          No hidden fees. No commissions. No surprises.
+          <br className="hidden sm:block" />
+          Just connect your wallet and go live in 60 seconds.
         </p>
 
-        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+        {/* Trust badges */}
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-400">
+          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> One-time fee</span>
+          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> Zero commission</span>
+          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> Full ownership</span>
+        </div>
+
+        <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/create" className="btn-primary text-base px-8 py-4">
             Launch my collection (0.15 SOL)
           </Link>
@@ -93,6 +102,26 @@ export default function HomePage() {
           <AnimatedCounter />
         </div>
       </section>
+
+      {/* ── Value Banner ─────────────────────────────────────────────────── */}
+      <div
+        className="relative w-full py-7 overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
+      >
+        {/* Inner glow */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 200% at 50% 50%, rgba(255,255,255,0.10) 0%, transparent 70%)",
+          }}
+        />
+        <p className="relative text-center text-white font-bold text-xl sm:text-2xl px-6 tracking-tight"
+           style={{ textShadow: "0 2px 20px rgba(124,58,237,0.5)" }}>
+          🔒 Pay 0.15 SOL once. Keep 100% of your royalties. Forever.
+        </p>
+      </div>
 
       {/* ── "Most tools are complicated" ──────────────────────────────────── */}
       <section className="py-24 px-4">
@@ -118,6 +147,39 @@ export default function HomePage() {
                 <p className="text-zinc-400 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Why SolFactory? ──────────────────────────────────────────────── */}
+      <section className="py-24 px-4">
+        <div className="mx-auto max-w-3xl text-center space-y-10">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">
+            Pay once. Own everything. Forever.
+          </h2>
+
+          <div className="space-y-5 text-left max-w-xl mx-auto">
+            {[
+              "0.15 SOL flat fee — no subscriptions, no surprises",
+              "100% of royalties go to you — we take absolutely nothing on your sales",
+              "Your collection lives on Solana forever — fully verifiable on-chain",
+            ].map((point, i) => (
+              <div key={i} className="flex items-start gap-4">
+                <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center">
+                  <span className="text-emerald-400 text-xs font-bold">✓</span>
+                </span>
+                <p className="text-zinc-200 text-base leading-relaxed">{point}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-2xl border border-zinc-700 bg-zinc-900/60 px-6 py-5 max-w-lg mx-auto">
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              <span className="text-zinc-200 font-semibold">
+                This isn&apos;t a promise. It&apos;s written in the smart contract.
+              </span>{" "}
+              Anyone can verify it on-chain.
+            </p>
           </div>
         </div>
       </section>

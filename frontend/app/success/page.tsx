@@ -1,13 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Copy, Check, ExternalLink, Loader2, Twitter, Rocket, Link2 } from "lucide-react";
 import { NftPreviewCard } from "@/components/NftPreviewCard";
 import { truncateAddress } from "@/lib/utils";
-
-const SIM_IMAGE_KEY = "sol_factory_sim_image";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -21,17 +19,7 @@ function SuccessContent() {
 
   const [copied, setCopied]             = useState(false);
   const [copiedMintLink, setCopiedMintLink] = useState(false);
-  const [displayImage, setDisplayImage] = useState<string>(imageParam);
-
-  // Restore the user's actual image from sessionStorage when in simulation mode
-  useEffect(() => {
-    if (simulated && imageParam === "session") {
-      const stored = sessionStorage.getItem(SIM_IMAGE_KEY);
-      if (stored) setDisplayImage(stored);
-      // Clear after use so old images don't bleed into future visits
-      sessionStorage.removeItem(SIM_IMAGE_KEY);
-    }
-  }, [simulated, imageParam]);
+  const displayImage = imageParam;
 
   function handleCopy() {
     if (!address) return;
@@ -42,7 +30,7 @@ function SuccessContent() {
 
   function handleCopyMintLink() {
     if (!address) return;
-    const origin   = typeof window !== "undefined" ? window.location.origin : "https://solfactory.com";
+    const origin   = typeof window !== "undefined" ? window.location.origin : "https://solfactory.pro";
     const suffix   = simulated ? "?devnet=true" : "";
     navigator.clipboard.writeText(`${origin}/mint/${address}${suffix}`);
     setCopiedMintLink(true);
@@ -51,7 +39,7 @@ function SuccessContent() {
 
   const mintLinkDisplay =
     address
-      ? `solfactory.com/mint/${address.slice(0, 8)}…${address.slice(-4)}${simulated ? "?devnet=true" : ""}`
+      ? `solfactory.pro/mint/${address.slice(0, 8)}…${address.slice(-4)}${simulated ? "?devnet=true" : ""}`
       : "";
 
   const explorerCluster = "devnet";

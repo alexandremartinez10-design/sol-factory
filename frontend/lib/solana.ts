@@ -57,6 +57,8 @@ export interface CollectionInfo {
   mintPrice: number;
   /** Address of the mpl-core Collection asset */
   collectionMint: string;
+  /** Whether public minting via mint_nft is allowed (defaults to true) */
+  publicMintEnabled: boolean;
   /** Internal: creator pubkey used for filtering — not exposed to callers */
   _creator?: PublicKey;
 }
@@ -163,7 +165,10 @@ export async function initializeCollection(
     .signers([collectionKeypair, nftMintKeypair])
     .rpc();
 
-  return collectionStatePda.toString();
+  return {
+    address:       collectionStatePda.toString(),
+    collectionMint: collectionKeypair.publicKey.toString(),
+  };
 }
 
 // ── getCollections ────────────────────────────────────────────────────────────
@@ -189,6 +194,8 @@ const COLLECTION_STATE_DISC = Buffer.from([228, 135, 148, 4, 244, 41, 118, 165])
  *   [32] creator      Pubkey
  *   [32] collection_mint Pubkey
  *   [1]  bump         u8
+ *   [1]  authority_bump u8
+ *   [1]  public_mint_enabled bool
  */
 function decodeCollectionState(
   pubkey: PublicKey,
@@ -208,17 +215,22 @@ function decodeCollectionState(
     const mintedCount = Number(data.readBigUInt64LE(offset)); offset += 8;
 
     const creator        = new PublicKey(data.subarray(offset, offset + 32)); offset += 32;
-    const collectionMint = new PublicKey(data.subarray(offset, offset + 32));
+    const collectionMint = new PublicKey(data.subarray(offset, offset + 32)); offset += 32;
+    offset += 1; // bump
+    offset += 1; // authority_bump
+    // public_mint_enabled: default true for old accounts that lack the field
+    const publicMintEnabled = offset < data.length ? data[offset] !== 0 : true;
 
     return {
-      address:        pubkey.toString(),
+      address:           pubkey.toString(),
       name,
       symbol,
       supply,
-      mintPrice:      mintPriceLamp / LAMPORTS_PER_SOL,
-      minted:         mintedCount,
-      collectionMint: collectionMint.toString(),
-      _creator:       creator,
+      mintPrice:         mintPriceLamp / LAMPORTS_PER_SOL,
+      minted:            mintedCount,
+      collectionMint:    collectionMint.toString(),
+      publicMintEnabled,
+      _creator:          creator,
     };
   } catch {
     return null; // malformed account — skip silently
@@ -272,6 +284,30 @@ export async function getCollectionByAddress(
   } catch {
     return null;
   }
+}
+
+// ── togglePublicMint ─────────────────────────────────────────────────────────
+
+/**
+ * Call toggle_public_mint to enable or disable public minting for a collection.
+ * Only the collection creator can call this.
+ */
+export async function togglePublicMint(
+  wallet: AnchorWallet,
+  collectionStatePda: string,
+  collectionMint: string,
+  enabled: boolean
+): Promise<void> {
+  const program = makeProgram(wallet);
+  await program.methods
+    .togglePublicMint(enabled)
+    .accounts({
+      creator:         wallet.publicKey,
+      collection:      new PublicKey(collectionMint),
+      collectionState: new PublicKey(collectionStatePda),
+      systemProgram:   SystemProgram.programId,
+    })
+    .rpc();
 }
 
 // ── sendDonation ──────────────────────────────────────────────────────────────

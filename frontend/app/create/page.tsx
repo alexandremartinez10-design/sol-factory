@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Upload, Loader2, AlertCircle, Zap } from "lucide-react";
@@ -8,11 +8,9 @@ import { NftPreviewCard } from "@/components/NftPreviewCard";
 import { cn } from "@/lib/utils";
 import {
   initializeCollection,
+  togglePublicMint,
   type AnchorWallet,
 } from "@/lib/solana";
-
-// ── Session-storage key used to pass the user's image to /success ─────────────
-const SIM_IMAGE_KEY = "sol_factory_sim_image";
 
 // ── Animated launch steps ─────────────────────────────────────────────────────
 
@@ -23,10 +21,10 @@ const SIM_STEPS = [
 ];
 
 const REAL_STEPS = [
-  "Optimizing artwork...",
-  "Uploading to Arweave...",
-  "Deploying Smart Contract on Solana...",
-  "Minting NFT #1...",
+  "Uploading your artwork...",
+  "Creating your collection...",
+  "Minting NFT #1 to your wallet...",
+  "Almost there...",
 ];
 
 // Simulation: 3 steps × 1 s = 3 s total
@@ -45,6 +43,20 @@ function LaunchOverlay({
   total: number;
   isSimulated: boolean;
 }) {
+  // Two-phase crossfade: fade old text out, then fade new text in from below
+  const [displayStep, setDisplayStep] = useState(step);
+  const [phase, setPhase] = useState<"in" | "out">("in");
+
+  useEffect(() => {
+    if (step === displayStep) return;
+    setPhase("out");
+    const t = setTimeout(() => {
+      setDisplayStep(step);
+      setPhase("in");
+    }, 180);
+    return () => clearTimeout(t);
+  }, [step, displayStep]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm">
       <div className="flex flex-col items-center gap-7 text-center px-6 max-w-sm">
@@ -59,13 +71,17 @@ function LaunchOverlay({
           </div>
         </div>
 
-        {/* Step text — key-based re-mount triggers fade */}
-        <div className="space-y-1.5 min-h-[3rem]">
+        {/* Step text — smooth crossfade */}
+        <div className="space-y-1.5 min-h-[3rem] overflow-hidden">
           <p
-            key={step}
-            className="text-white font-bold text-lg animate-fade-up"
+            className="text-white font-bold text-lg transition-all duration-200 ease-in-out"
+            style={{
+              opacity:   phase === "in" ? 1 : 0,
+              transform: phase === "in" ? "translateY(0)" : "translateY(-6px)",
+              transitionDuration: phase === "in" ? "280ms" : "160ms",
+            }}
           >
-            {step}
+            {displayStep}
           </p>
           {isSimulated && (
             <p className="text-yellow-400/80 text-sm font-medium">
@@ -80,7 +96,7 @@ function LaunchOverlay({
             <div
               key={i}
               className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
+                "h-1.5 rounded-full transition-all duration-500",
                 i <= stepIndex ? "w-6 bg-purple-500" : "w-1.5 bg-zinc-700"
               )}
             />
@@ -109,6 +125,7 @@ function CreateForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [collectionMode, setCollectionMode] = useState<"drop" | "loyalty">("drop");
   const [isLaunching, setIsLaunching] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -192,16 +209,10 @@ function CreateForm() {
 
       if (simulate) {
         // ── SIMULATION PATH ─────────────────────────────────────────────
-        // Store the user's actual image in sessionStorage so /success can display it.
-        if (imagePreview) {
-          try {
-            sessionStorage.setItem(SIM_IMAGE_KEY, imagePreview);
-          } catch {
-            // sessionStorage might be full (e.g. large image); silently ignore
-          }
-        }
+        // Create a blob URL from the selected file so /success shows the real image.
+        const blobUrl = imageFile ? URL.createObjectURL(imageFile) : "";
 
-        // Run animation concurrently with a fixed 3-second wait
+        // Run animation concurrently with a fixed wait
         await Promise.all([
           runStepAnimation(steps),
           new Promise((r) => setTimeout(r, steps.length * STEP_MS)),
@@ -216,7 +227,7 @@ function CreateForm() {
         const params = new URLSearchParams({
           name,
           address: fakeAddress,
-          image: "session", // tells /success to read from sessionStorage
+          image: blobUrl,
           symbol,
           supply: String(supply),
           mintPrice: String(mintPrice),
@@ -228,7 +239,7 @@ function CreateForm() {
 
       // ── REAL PATH ────────────────────────────────────────────────────────
 
-      // Step 1 & 2: Upload
+      // Step 1: Upload artwork
       setCurrentStep(steps[0]);
       setCurrentStepIndex(0);
       setUploadWarning(null);
@@ -259,9 +270,9 @@ function CreateForm() {
         setUploadWarning("Upload not configured — using test metadata");
       }
 
-      // Step 3: Deploy
-      setCurrentStep(steps[2]);
-      setCurrentStepIndex(2);
+      // Step 2: Deploy collection
+      setCurrentStep(steps[1]);
+      setCurrentStepIndex(1);
 
       const wallet: AnchorWallet = {
         publicKey,
@@ -269,7 +280,7 @@ function CreateForm() {
         signAllTransactions,
       };
 
-      const collectionState = await initializeCollection({
+      const { address: collectionState, collectionMint } = await initializeCollection({
         wallet,
         name,
         symbol,
@@ -278,7 +289,15 @@ function CreateForm() {
         metadataUri,
       });
 
-      // Step 4: Confirm
+      // Step 3: Loyalty Card — disable public minting
+      setCurrentStep(steps[2]);
+      setCurrentStepIndex(2);
+      if (collectionMode === "loyalty") {
+        await togglePublicMint(wallet, collectionState, collectionMint, false);
+      }
+      await new Promise((r) => setTimeout(r, 300));
+
+      // Step 4: Almost there
       setCurrentStep(steps[3]);
       setCurrentStepIndex(3);
       await new Promise((r) => setTimeout(r, 400));
@@ -408,6 +427,45 @@ function CreateForm() {
                     flashPreview();
                   }}
                 />
+              </div>
+            </div>
+
+            {/* Mode toggle */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-zinc-300">
+                Collection type
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCollectionMode("drop")}
+                  className={cn(
+                    "flex flex-col items-start gap-1 rounded-xl border px-4 py-3 text-left transition-all",
+                    collectionMode === "drop"
+                      ? "border-purple-500 bg-purple-500/10 text-white"
+                      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                  )}
+                >
+                  <span className="text-sm font-semibold">NFT Drop</span>
+                  <span className="text-xs leading-snug opacity-70">
+                    Anyone can mint — open to the public
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCollectionMode("loyalty")}
+                  className={cn(
+                    "flex flex-col items-start gap-1 rounded-xl border px-4 py-3 text-left transition-all",
+                    collectionMode === "loyalty"
+                      ? "border-purple-500 bg-purple-500/10 text-white"
+                      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
+                  )}
+                >
+                  <span className="text-sm font-semibold">Loyalty Card</span>
+                  <span className="text-xs leading-snug opacity-70">
+                    You control who receives — no public minting
+                  </span>
+                </button>
               </div>
             </div>
 

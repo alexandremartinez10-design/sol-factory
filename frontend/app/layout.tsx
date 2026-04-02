@@ -9,12 +9,17 @@ import { SimBanner } from "@/components/SimBanner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://solfactory.pro"),
   title: "SolFactory — Launch your NFT collection in 60 seconds",
   description:
     "No code. No setup. Just connect your wallet and go live instantly on Solana.",
+  alternates: {
+    canonical: "https://solfactory.pro",
+  },
   openGraph: {
     title: "SolFactory",
     description: "Launch your NFT collection in 60 seconds on Solana.",
+    url: "https://solfactory.pro",
     type: "website",
   },
 };

@@ -22,10 +22,13 @@ const EXPLORER_BASE  = "https://explorer.solana.com/tx";
 export default function DonatePage() {
   const { connected, publicKey, signTransaction, signAllTransactions } = useWallet();
 
-  const [selected, setSelected]   = useState<number>(0.1);
-  const [isSending, setIsSending] = useState(false);
-  const [txSig, setTxSig]         = useState<string | null>(null);
-  const [error, setError]         = useState<string | null>(null);
+  const [selected, setSelected]     = useState<number>(0.1);
+  const [customAmount, setCustomAmount] = useState("");
+  const [isSending, setIsSending]   = useState(false);
+  const [txSig, setTxSig]           = useState<string | null>(null);
+  const [error, setError]           = useState<string | null>(null);
+
+  const activeAmount = customAmount !== "" ? parseFloat(customAmount) : selected;
 
   async function handleDonate() {
     if (!connected || !publicKey || !signTransaction || !signAllTransactions) return;
@@ -33,7 +36,7 @@ export default function DonatePage() {
     setError(null);
     try {
       const wallet: AnchorWallet = { publicKey, signTransaction, signAllTransactions };
-      const sig = await sendDonation(wallet, selected);
+      const sig = await sendDonation(wallet, activeAmount);
       setTxSig(sig);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Transaction failed. Please try again.");
@@ -106,10 +109,10 @@ export default function DonatePage() {
             {PRESET_AMOUNTS.map((amt) => (
               <button
                 key={amt}
-                onClick={() => { setSelected(amt); setError(null); }}
+                onClick={() => { setSelected(amt); setCustomAmount(""); setError(null); }}
                 className={cn(
                   "px-3.5 py-1.5 rounded-lg border text-xs font-semibold transition-all duration-150",
-                  selected === amt
+                  customAmount === "" && selected === amt
                     ? "border-purple-500 bg-purple-500/20 text-white"
                     : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
                 )}
@@ -117,6 +120,17 @@ export default function DonatePage() {
                 ◎ {amt}
               </button>
             ))}
+
+            {/* Custom amount */}
+            <input
+              type="number"
+              min={0.01}
+              step={0.01}
+              placeholder="Or enter any amount in SOL"
+              value={customAmount}
+              onChange={(e) => { setCustomAmount(e.target.value); setError(null); }}
+              className="flex-1 min-w-[160px] px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-colors duration-150"
+            />
 
             {/* Send button */}
             {connected ? (

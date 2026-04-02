@@ -70,31 +70,29 @@ export default function HomePage() {
         </div>
 
         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-[1.08] max-w-4xl mx-auto">
-          Pay 0.15 SOL once.
+          Launch your NFT collection
           <br />
-          <span className="gradient-text">Keep 100% of your royalties. Forever.</span>
+          <span className="gradient-text">in 60 seconds</span>
         </h1>
 
         <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto leading-relaxed">
-          No hidden fees. No commissions. No surprises.
-          <br className="hidden sm:block" />
-          Just connect your wallet and go live in 60 seconds.
+          No code. No setup. Just connect your wallet and go live instantly.
         </p>
 
-        {/* Trust badges */}
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-400">
-          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> One-time fee</span>
-          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> Zero commission</span>
-          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> Full ownership</span>
-        </div>
-
-        <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/create" className="btn-primary text-base px-8 py-4">
             Launch my collection (0.15 SOL)
           </Link>
           <Link href="/create?devnet=true" className="btn-ghost text-base px-8 py-4">
             Test on Devnet (free)
           </Link>
+        </div>
+
+        {/* Trust badges */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-400">
+          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> One-time fee</span>
+          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> Zero commission</span>
+          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> Full ownership</span>
         </div>
 
         {/* Animated counter */}
@@ -155,7 +153,7 @@ export default function HomePage() {
       <section className="py-24 px-4">
         <div className="mx-auto max-w-3xl text-center space-y-10">
           <h2 className="text-3xl sm:text-4xl font-bold text-white">
-            Pay once. Own everything. Forever.
+            Why creators choose us
           </h2>
 
           <div className="space-y-5 text-left max-w-xl mx-auto">

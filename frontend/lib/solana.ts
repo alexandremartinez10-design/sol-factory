@@ -99,7 +99,7 @@ function makeProgram(wallet: AnchorWallet): any {
     commitment: "confirmed",
     preflightCommitment: "confirmed",
   });
-  // Program ID is read from IDL.metadata.address in anchor 0.30.1.
+  // Anchor 0.30.1 reads program ID from IDL.address (top-level).
   // Return as any to avoid excessively deep generic type instantiation.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new Program(IDL as any, provider) as any;

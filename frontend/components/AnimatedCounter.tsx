@@ -7,7 +7,7 @@ function random(min: number, max: number) {
 }
 
 export function AnimatedCounter() {
-  const [count, setCount] = useState<number | null>(null);
+  const [count, setCount] = useState<number>(random(12, 47));
   const [animating, setAnimating] = useState(false);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export function AnimatedCounter() {
           animating ? "opacity-0 -translate-y-1" : "opacity-100 translate-y-0"
         }`}
       >
-        {count ?? "—"}
+        {count}
       </span>
     </div>
   );

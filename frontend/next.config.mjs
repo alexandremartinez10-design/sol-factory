@@ -17,22 +17,20 @@ const nextConfig = {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
-        fs:     false,
-        net:    false,
-        tls:    false,
-        os:     false,
-        path:   false,
-        buffer: require.resolve("buffer/"),
-        crypto: require.resolve("crypto-browserify"),
-        stream: require.resolve("stream-browserify"),
+        fs:      false,
+        net:     false,
+        tls:     false,
+        os:      false,
+        path:    false,
+        buffer:  require.resolve("buffer/"),
+        stream:  require.resolve("stream-browserify"),
+        crypto:  require.resolve("crypto-browserify"),
         process: require.resolve("process/browser"),
       };
-      // Inject Buffer and process as globals into every webpack module so that
-      // packages that reference them without importing work in the browser bundle.
       config.plugins.push(
         new webpack.ProvidePlugin({
           Buffer:  ["buffer", "Buffer"],
-          process: ["process"],
+          process: "process/browser",
         })
       );
     }

@@ -155,20 +155,22 @@ export async function initializeCollection(
 
   const mintPriceLamports = Math.floor(mintPriceSol * LAMPORTS_PER_SOL);
 
-  // ── Debug logging — share these logs when reporting "Expected Buffer" ────────
+  // ── Debug logging ────────────────────────────────────────────────────────────
   console.log("=== initializeCollection DEBUG ===");
   console.log("IDL version :", IDL.version);
   console.log("IDL address :", IDL.address);
   console.log("Program ID  :", program.programId.toString());
   console.log("BN import OK:", typeof BN, new BN(1).toString());
   console.log("Buffer OK   :", typeof Buffer, Buffer.isBuffer(Buffer.from([1])));
-  console.log("--- params ---");
-  console.log("wallet      :", wallet.publicKey.toString());
-  console.log("name        :", name);
-  console.log("symbol      :", symbol);
-  console.log("supply      :", supply, "→ BN:", new BN(supply).toString());
-  console.log("mintPrice   :", mintPriceSol, "SOL →", mintPriceLamports, "lamports → BN:", new BN(mintPriceLamports).toString());
-  console.log("metadataUri :", metadataUri);
+  console.log("Full IDL    :", JSON.stringify(program.idl, null, 2));
+  console.log("--- args ---");
+  console.log("Args:", {
+    name,
+    symbol,
+    supply:    new BN(supply).toString(),
+    mintPrice: new BN(mintPriceLamports).toString(),
+    uri:       metadataUri,
+  });
   console.log("--- accounts ---");
   console.log("creator            :", wallet.publicKey.toString());
   console.log("platformWallet     :", PLATFORM_WALLET.toString());
@@ -179,6 +181,15 @@ export async function initializeCollection(
   console.log("mplCoreProgram     :", MPL_CORE_PROGRAM.toString());
   console.log("systemProgram      :", SystemProgram.programId.toString());
   console.log("=================================");
+
+  console.log('=== PRE-TRANSACTION DEBUG ===');
+  console.log('name:', name, typeof name);
+  console.log('symbol:', symbol, typeof symbol);
+  console.log('supply:', supply, typeof supply);
+  console.log('mintPrice:', mintPriceSol, typeof mintPriceSol);
+  console.log('metadataUri:', metadataUri, typeof metadataUri);
+  console.log('wallet pubkey:', wallet.publicKey?.toString());
+  console.log('============================');
 
   try {
     await program.methods

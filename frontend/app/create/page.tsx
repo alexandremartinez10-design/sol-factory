@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type FC } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Upload, Loader2, AlertCircle, Zap } from "lucide-react";
@@ -111,6 +111,31 @@ function LaunchOverlay({
 
 function CreateForm() {
   const searchParams = useSearchParams();
+
+  // Global error handler — catches uncaught errors including those from
+  // async callbacks that aren't wrapped in try/catch
+  useEffect(() => {
+    const handleGlobalError = (msg: string | Event, src?: string, line?: number, col?: number, err?: Error) => {
+      console.error("=== GLOBAL UNCAUGHT ERROR ===");
+      console.error("MSG :", msg);
+      console.error("SRC :", src, "line:", line, "col:", col);
+      console.error("STACK:", err?.stack);
+      console.error("=============================");
+    };
+    const handleUnhandledRejection = (e: PromiseRejectionEvent) => {
+      console.error("=== UNHANDLED PROMISE REJECTION ===");
+      console.error("REASON :", e.reason);
+      console.error("STACK  :", e.reason?.stack);
+      console.error("===================================");
+    };
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+    const prev = window.onerror;
+    window.onerror = handleGlobalError;
+    return () => {
+      window.onerror = prev;
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+    };
+  }, []);
   const isDevnet = searchParams.get("devnet") === "true";
   const { connected, publicKey, signTransaction, signAllTransactions } =
     useWallet();
@@ -253,22 +278,30 @@ function CreateForm() {
         formData.append("name", name);
         formData.append("symbol", symbol);
 
+        console.log("[upload] Starting POST /api/upload", { name, symbol, fileSize: imageFile!.size, fileType: imageFile!.type });
         const uploadRes = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         });
+        console.log("[upload] Response status:", uploadRes.status, uploadRes.ok ? "OK" : "FAILED");
         if (!uploadRes.ok) {
           const body = await uploadRes.json().catch(() => ({}));
+          console.error("[upload] Error body:", body);
           throw new Error(body?.error ?? `Upload failed (${uploadRes.status})`);
         }
-        ({ imageUrl, metadataUri } = await uploadRes.json());
-      } catch {
+        const uploadJson = await uploadRes.json();
+        console.log("[upload] Success:", uploadJson);
+        ({ imageUrl, metadataUri } = uploadJson);
+      } catch (uploadErr) {
         // Upload not configured (no PRIVATE_KEY in env) — fall back to test metadata
+        console.warn("[upload] Caught error, using fallback metadata:", uploadErr instanceof Error ? uploadErr.message : uploadErr);
         const slug = encodeURIComponent(name);
         imageUrl   = `https://ui-avatars.com/api/?name=${slug}&background=7c3aed&color=fff&size=512&bold=true`;
         metadataUri = imageUrl;
         setUploadWarning("Upload not configured — using test metadata");
       }
+
+      console.log("[create] Passing to initializeCollection:", { name, symbol, supply, mintPrice, metadataUri });
 
       // Step 2: Deploy collection
       setCurrentStep(steps[1]);
@@ -311,9 +344,17 @@ function CreateForm() {
         mintPrice: String(mintPrice),
       });
       router.push(`/success?${params.toString()}`);
-    } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Transaction failed. Try again.";
+    } catch (err: unknown) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const e = err as any;
+      console.error("=== LAUNCH ERROR (full) ===");
+      console.error("FULL ERR :", e);
+      console.error("MESSAGE  :", e?.message);
+      console.error("NAME     :", e?.name);
+      console.error("STACK    :", e?.stack);
+      try { console.error("JSON     :", JSON.stringify(e, Object.getOwnPropertyNames(e))); } catch {}
+      console.error("==========================");
+      const msg = e?.message ?? "Transaction failed. Try again.";
       setLaunchError(msg);
     } finally {
       setIsLaunching(false);

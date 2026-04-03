@@ -1,18 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-// Force Node.js runtime — @irys/sdk uses native Node modules
-export const runtime = "nodejs";
-
 export async function POST(request: NextRequest) {
   try {
-    // ── Parse multipart form data ─────────────────────────────────────────
     const formData = await request.formData();
-    const imageFile = formData.get("image") as File | null;
-    const name      = (formData.get("name")        as string | null) ?? "";
-    const symbol    = (formData.get("symbol")      as string | null) ?? "";
+    const image       = formData.get("image") as File | null;
+    const name        = (formData.get("name")        as string | null) ?? "";
+    const symbol      = (formData.get("symbol")      as string | null) ?? "";
     const description = (formData.get("description") as string | null) ?? "";
 
-    if (!imageFile || !name) {
+    if (!image || !name) {
       return NextResponse.json(
         { error: "Missing required fields: image and name" },
         { status: 400 }
@@ -20,8 +16,8 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Validate file size (5 MB limit) ───────────────────────────────────
-    const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-    if (imageFile.size > MAX_SIZE) {
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (image.size > MAX_SIZE) {
       return NextResponse.json(
         { error: "Image is too large. Please use a file under 5 MB." },
         { status: 413 }
@@ -30,59 +26,46 @@ export async function POST(request: NextRequest) {
 
     // ── Validate file type ────────────────────────────────────────────────
     const VALID_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!VALID_TYPES.includes(imageFile.type)) {
+    if (!VALID_TYPES.includes(image.type)) {
       return NextResponse.json(
         { error: "Invalid image type. Use JPG, PNG, GIF, or WebP." },
         { status: 422 }
       );
     }
 
-    // ── Check platform key (PRIVATE_KEY preferred; PLATFORM_PRIVATE_KEY legacy) ──
-    const privateKey = process.env.PRIVATE_KEY ?? process.env.PLATFORM_PRIVATE_KEY;
-    if (!privateKey) {
-      console.error("PLATFORM_PRIVATE_KEY is not set");
+    const pinataJWT = process.env.PINATA_JWT;
+    if (!pinataJWT) {
+      console.error("PINATA_JWT is not set");
       return NextResponse.json(
         { error: "Upload service is not configured." },
         { status: 500 }
       );
     }
 
-    // ── Initialise Irys (dynamic import avoids edge-runtime conflicts) ────
-    const { NodeIrys } = await import("@irys/sdk");
+    // ── Upload image to Pinata ────────────────────────────────────────────
+    const imageForm = new FormData();
+    imageForm.append("file", image);
+    imageForm.append("pinataMetadata", JSON.stringify({ name: `${name}-image` }));
 
-    const irys = new NodeIrys({
-      network: "mainnet",
-      token:   "solana",
-      key:     privateKey,
-      config: {
-        providerUrl: process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.mainnet-beta.solana.com",
-      },
+    const imageRes = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+      method:  "POST",
+      headers: { Authorization: `Bearer ${pinataJWT}` },
+      body:    imageForm,
     });
 
-    await irys.ready();
-
-    // ── Auto-fund if balance is too low (covers ~1 MB) ────────────────────
-    const imageBuffer  = Buffer.from(await imageFile.arrayBuffer());
-    const imageSize    = imageBuffer.byteLength;
-    const metaEstimate = 512; // rough bytes for JSON metadata
-    const needed       = await irys.getPrice(imageSize + metaEstimate);
-
-    const balance = await irys.getLoadedBalance();
-    if (balance.isLessThan(needed)) {
-      await irys.fund(needed.minus(balance).multipliedBy(1.1).toFixed(0));
+    if (!imageRes.ok) {
+      const text = await imageRes.text();
+      console.error("Pinata image upload failed:", imageRes.status, text);
+      return NextResponse.json(
+        { error: "Image upload failed", details: text },
+        { status: 502 }
+      );
     }
 
-    // ── Upload image ───────────────────────────────────────────────────────
-    const imageReceipt = await irys.upload(imageBuffer, {
-      tags: [
-        { name: "Content-Type",  value: imageFile.type },
-        { name: "App-Name",      value: "SolFactory" },
-        { name: "Collection",    value: name },
-      ],
-    });
-    const imageUrl = `https://gateway.irys.xyz/${imageReceipt.id}`;
+    const imageData = await imageRes.json() as { IpfsHash: string };
+    const imageUrl  = `https://gateway.pinata.cloud/ipfs/${imageData.IpfsHash}`;
 
-    // ── Build and upload metadata ─────────────────────────────────────────
+    // ── Upload metadata to Pinata ─────────────────────────────────────────
     const metadata = {
       name,
       symbol,
@@ -90,31 +73,41 @@ export async function POST(request: NextRequest) {
       image:       imageUrl,
       attributes:  [],
       properties:  {
-        files:    [{ uri: imageUrl, type: imageFile.type }],
+        files:    [{ uri: imageUrl, type: image.type }],
         category: "image",
         creators: [],
       },
     };
 
-    const metadataBuffer  = Buffer.from(JSON.stringify(metadata, null, 2));
-    const metadataReceipt = await irys.upload(metadataBuffer, {
-      tags: [
-        { name: "Content-Type", value: "application/json" },
-        { name: "App-Name",     value: "SolFactory" },
-        { name: "Collection",   value: name },
-      ],
+    const metaRes = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
+      method:  "POST",
+      headers: {
+        Authorization:  `Bearer ${pinataJWT}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pinataContent:  metadata,
+        pinataMetadata: { name: `${name}-metadata` },
+      }),
     });
-    const metadataUri = `https://gateway.irys.xyz/${metadataReceipt.id}`;
+
+    if (!metaRes.ok) {
+      const text = await metaRes.text();
+      console.error("Pinata metadata upload failed:", metaRes.status, text);
+      return NextResponse.json(
+        { error: "Metadata upload failed", details: text },
+        { status: 502 }
+      );
+    }
+
+    const metaData    = await metaRes.json() as { IpfsHash: string };
+    const metadataUri = `https://gateway.pinata.cloud/ipfs/${metaData.IpfsHash}`;
 
     return NextResponse.json({ imageUrl, metadataUri });
-  } catch (err) {
-    console.error("[api/upload] Error:", err);
-    return NextResponse.json(
-      {
-        error:   "Upload failed",
-        details: err instanceof Error ? err.message : "Unknown error",
-      },
-      { status: 500 }
-    );
+
+  } catch (error: unknown) {
+    const e = error as Error;
+    console.error("Upload error:", e.message, e.stack);
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

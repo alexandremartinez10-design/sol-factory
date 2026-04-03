@@ -5,6 +5,7 @@ import "./globals.css";
 import { WalletProvider } from "@/components/WalletProvider";
 import { NavBar } from "@/components/NavBar";
 import { SimBanner } from "@/components/SimBanner";
+import { Polyfills } from "@/components/Polyfills";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,6 +34,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${inter.className} bg-[#0a0a0a] text-white antialiased`}>
         <WalletProvider>
+          <Polyfills />
           <NavBar />
           <main className="min-h-screen pt-16">
             <Suspense fallback={null}><SimBanner /></Suspense>

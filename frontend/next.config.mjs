@@ -17,21 +17,18 @@ const nextConfig = {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        os: false,
-        path: false,
-        crypto: false,
-        // Provide the `buffer` npm package as the Buffer polyfill.
-        // This must match the instance imported explicitly in lib/solana.ts
-        // so that Buffer.isBuffer() checks inside @coral-xyz/anchor pass.
+        fs:     false,
+        net:    false,
+        tls:    false,
+        os:     false,
+        path:   false,
         buffer: require.resolve("buffer/"),
+        crypto: require.resolve("crypto-browserify"),
         stream: require.resolve("stream-browserify"),
         process: require.resolve("process/browser"),
       };
-      // Make Buffer and process available as globals so any module that
-      // references them without importing works in the browser bundle.
+      // Inject Buffer and process as globals into every webpack module so that
+      // packages that reference them without importing work in the browser bundle.
       config.plugins.push(
         new webpack.ProvidePlugin({
           Buffer:  ["buffer", "Buffer"],

@@ -1,30 +1,23 @@
 /**
  * lib/solana.ts
  * All on-chain interactions for SolFactory.
- * Network: devnet  —  RPC: clusterApiUrl("devnet")
+ * Uses raw @solana/web3.js — no @coral-xyz/anchor in the browser.
  */
 
-// Explicit Buffer import — ensures the same Buffer instance used by this module
-// matches the one expected by @coral-xyz/anchor's borsh encoder in the browser.
-// webpack 5's ProvidePlugin global and an explicit import can be different
-// instances, causing Buffer.isBuffer() to return false ("Expected Buffer" error).
 import { Buffer } from "buffer";
-if (typeof globalThis !== "undefined" && !globalThis.Buffer) {
-  (globalThis as typeof globalThis & { Buffer: typeof Buffer }).Buffer = Buffer;
-}
 
 import {
+  AccountMeta,
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   Transaction,
+  TransactionInstruction,
   clusterApiUrl,
 } from "@solana/web3.js";
-import { AnchorProvider, BN, Program } from "@coral-xyz/anchor";
 import bs58 from "bs58";
-import { IDL } from "./idl";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -42,39 +35,57 @@ export const PLATFORM_WALLET = new PublicKey(
 
 export const PLATFORM_FEE_SOL = 0.15;
 
-export const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+export const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-/** Minimal wallet interface accepted by AnchorProvider */
 export interface AnchorWallet {
   publicKey: PublicKey;
   signTransaction(tx: Transaction): Promise<Transaction>;
   signAllTransactions(txs: Transaction[]): Promise<Transaction[]>;
 }
 
-/** Collection data returned by getCollections */
 export interface CollectionInfo {
-  /** Address of the CollectionState PDA */
   address: string;
   name: string;
   symbol: string;
-  /** How many NFTs have been minted (starts at 1) */
   minted: number;
   supply: number;
-  /** Mint price in SOL */
   mintPrice: number;
-  /** Address of the mpl-core Collection asset */
   collectionMint: string;
-  /** Whether public minting via mint_nft is allowed (defaults to true) */
   publicMintEnabled: boolean;
-  /** Internal: creator pubkey used for filtering — not exposed to callers */
   _creator?: PublicKey;
+}
+
+// ── Instruction discriminators (sha256("global:<snake_case_name>")[0..8]) ────
+
+// initializeCollection → sha256("global:initialize_collection")[0..8]
+const DISC_INITIALIZE_COLLECTION = Buffer.from([112, 62, 53, 139, 173, 152, 98, 93]);
+
+// togglePublicMint → sha256("global:toggle_public_mint")[0..8]
+const DISC_TOGGLE_PUBLIC_MINT = Buffer.from([210, 17, 234, 26, 52, 149, 56, 96]);
+
+// ── Borsh helpers ────────────────────────────────────────────────────────────
+
+function encodeString(s: string): Buffer {
+  const bytes = Buffer.from(s, "utf8");
+  const len   = Buffer.allocUnsafe(4);
+  len.writeUInt32LE(bytes.length, 0);
+  return Buffer.concat([len, bytes]);
+}
+
+function encodeU64(n: number): Buffer {
+  const buf = Buffer.allocUnsafe(8);
+  buf.writeBigUInt64LE(BigInt(Math.floor(n)), 0);
+  return buf;
+}
+
+function encodeBool(b: boolean): Buffer {
+  return Buffer.from([b ? 1 : 0]);
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Derive the CollectionState PDA for a given creator + collection keypair. */
 export function deriveCollectionState(
   creator: PublicKey,
   collection: PublicKey
@@ -85,10 +96,6 @@ export function deriveCollectionState(
   );
 }
 
-/** Derive the program authority PDA for a given collection mint.
- *  Seeds: ["authority", collection_mint]
- *  This PDA is the mpl-core update_authority, enabling serverless minting.
- */
 export function deriveCollectionAuthority(
   collectionMint: PublicKey
 ): [PublicKey, number] {
@@ -96,31 +103,6 @@ export function deriveCollectionAuthority(
     [Buffer.from("authority"), collectionMint.toBuffer()],
     PROGRAM_ID
   );
-}
-
-/** Build an Anchor Program instance from a signer wallet. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function makeProgram(wallet: AnchorWallet): any {
-  // Cast to any: @coral-xyz/anchor@0.30.1 uses a generic Wallet type that
-  // doesn't match our simplified AnchorWallet, but the runtime shape is identical.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const provider = new AnchorProvider(connection, wallet as any, {
-    commitment: "confirmed",
-    preflightCommitment: "confirmed",
-  });
-  // Anchor 0.30.1 reads program ID from IDL.address (top-level).
-  // Return as any to avoid excessively deep generic type instantiation.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return new Program(IDL as any, provider) as any;
-}
-
-/** Read-only wallet stub — use for getProgramAccounts, no signing. */
-function readOnlyWallet(pubkey: PublicKey): AnchorWallet {
-  return {
-    publicKey: pubkey,
-    signTransaction: async (tx) => tx,
-    signAllTransactions: async (txs) => txs,
-  };
 }
 
 // ── initializeCollection ─────────────────────────────────────────────────────
@@ -131,15 +113,9 @@ export interface InitCollectionParams {
   symbol: string;
   supply: number;
   mintPriceSol: number;
-  /** Arweave / Irys metadata URI — caller is responsible for uploading first */
   metadataUri: string;
 }
 
-/**
- * Call the initialize_collection instruction on-chain.
- * Upload is handled separately by the caller before invoking this function.
- * Returns the CollectionState PDA address.
- */
 export async function initializeCollection(
   params: InitCollectionParams
 ): Promise<{ address: string; collectionMint: string }> {
@@ -148,79 +124,79 @@ export async function initializeCollection(
   const collectionKeypair = Keypair.generate();
   const nftMintKeypair    = Keypair.generate();
 
-  const [collectionStatePda]   = deriveCollectionState(wallet.publicKey, collectionKeypair.publicKey);
-  const [collectionAuthority]  = deriveCollectionAuthority(collectionKeypair.publicKey);
-
-  const program = makeProgram(wallet);
+  const [collectionStatePda] = deriveCollectionState(
+    wallet.publicKey,
+    collectionKeypair.publicKey
+  );
+  const [collectionAuthority] = deriveCollectionAuthority(
+    collectionKeypair.publicKey
+  );
 
   const mintPriceLamports = Math.floor(mintPriceSol * LAMPORTS_PER_SOL);
 
-  // ── Debug logging ────────────────────────────────────────────────────────────
-  console.log("=== initializeCollection DEBUG ===");
-  console.log("IDL version :", IDL.version);
-  console.log("IDL address :", IDL.address);
-  console.log("Program ID  :", program.programId.toString());
-  console.log("BN import OK:", typeof BN, new BN(1).toString());
-  console.log("Buffer OK   :", typeof Buffer, Buffer.isBuffer(Buffer.from([1])));
-  console.log("Full IDL    :", JSON.stringify(program.idl, null, 2));
-  console.log("--- args ---");
-  console.log("Args:", {
-    name,
-    symbol,
-    supply:    new BN(supply).toString(),
-    mintPrice: new BN(mintPriceLamports).toString(),
-    uri:       metadataUri,
-  });
-  console.log("--- accounts ---");
-  console.log("creator            :", wallet.publicKey.toString());
-  console.log("platformWallet     :", PLATFORM_WALLET.toString());
-  console.log("collection         :", collectionKeypair.publicKey.toString());
-  console.log("nftMint            :", nftMintKeypair.publicKey.toString());
-  console.log("collectionState    :", collectionStatePda.toString());
+  console.log("=== PRE-TRANSACTION DEBUG ===");
+  console.log("name:", name, typeof name);
+  console.log("symbol:", symbol, typeof symbol);
+  console.log("supply:", supply, typeof supply);
+  console.log("mintPrice:", mintPriceSol, typeof mintPriceSol);
+  console.log("metadataUri:", metadataUri, typeof metadataUri);
+  console.log("wallet pubkey:", wallet.publicKey?.toString());
+  console.log("collectionKeypair:", collectionKeypair.publicKey.toString());
+  console.log("nftMintKeypair:", nftMintKeypair.publicKey.toString());
+  console.log("collectionStatePda:", collectionStatePda.toString());
   console.log("collectionAuthority:", collectionAuthority.toString());
-  console.log("mplCoreProgram     :", MPL_CORE_PROGRAM.toString());
-  console.log("systemProgram      :", SystemProgram.programId.toString());
-  console.log("=================================");
+  console.log("============================");
 
-  console.log('=== PRE-TRANSACTION DEBUG ===');
-  console.log('name:', name, typeof name);
-  console.log('symbol:', symbol, typeof symbol);
-  console.log('supply:', supply, typeof supply);
-  console.log('mintPrice:', mintPriceSol, typeof mintPriceSol);
-  console.log('metadataUri:', metadataUri, typeof metadataUri);
-  console.log('wallet pubkey:', wallet.publicKey?.toString());
-  console.log('============================');
+  // Encode instruction data: discriminator + borsh args
+  const data = Buffer.concat([
+    DISC_INITIALIZE_COLLECTION,
+    encodeString(name),
+    encodeString(symbol),
+    encodeU64(supply),
+    encodeU64(mintPriceLamports),
+    encodeString(metadataUri),
+  ]);
 
-  try {
-    await program.methods
-      .initializeCollection(
-        name,
-        symbol,
-        new BN(supply),
-        new BN(mintPriceLamports),
-        metadataUri
-      )
-      .accounts({
-        creator:             wallet.publicKey,
-        platformWallet:      PLATFORM_WALLET,
-        collection:          collectionKeypair.publicKey,
-        nftMint:             nftMintKeypair.publicKey,
-        collectionState:     collectionStatePda,
-        collectionAuthority: collectionAuthority,
-        mplCoreProgram:      MPL_CORE_PROGRAM,
-        systemProgram:       SystemProgram.programId,
-      })
-      .signers([collectionKeypair, nftMintKeypair])
-      .rpc();
-  } catch (err) {
-    console.error("=== initializeCollection ERROR ===");
-    console.error("message :", err instanceof Error ? err.message : String(err));
-    console.error("name    :", err instanceof Error ? err.name : "unknown");
-    console.error("stack   :", err instanceof Error ? err.stack : "no stack");
-    console.error("full err:", JSON.stringify(err, Object.getOwnPropertyNames(err instanceof Error ? err : {})));
-    console.error("=================================");
-    throw err;
-  }
+  const keys: AccountMeta[] = [
+    { pubkey: wallet.publicKey,              isSigner: true,  isWritable: true  },
+    { pubkey: PLATFORM_WALLET,               isSigner: false, isWritable: true  },
+    { pubkey: collectionKeypair.publicKey,   isSigner: true,  isWritable: true  },
+    { pubkey: nftMintKeypair.publicKey,      isSigner: true,  isWritable: true  },
+    { pubkey: collectionStatePda,            isSigner: false, isWritable: true  },
+    { pubkey: collectionAuthority,           isSigner: false, isWritable: false },
+    { pubkey: MPL_CORE_PROGRAM,              isSigner: false, isWritable: false },
+    { pubkey: SystemProgram.programId,       isSigner: false, isWritable: false },
+  ];
+
+  const instruction = new TransactionInstruction({
+    programId: PROGRAM_ID,
+    keys,
+    data,
+  });
+
+  const { blockhash, lastValidBlockHeight } =
+    await connection.getLatestBlockhash();
+
+  const tx = new Transaction();
+  tx.recentBlockhash = blockhash;
+  tx.feePayer        = wallet.publicKey;
+  tx.add(instruction);
+
+  // Sign with the generated keypairs first, then hand to wallet
+  tx.partialSign(collectionKeypair, nftMintKeypair);
+  const signed = await wallet.signTransaction(tx);
+
+  console.log("Sending initializeCollection transaction...");
+  const sig = await connection.sendRawTransaction(signed.serialize(), {
+    skipPreflight: false,
+    preflightCommitment: "confirmed",
+  });
+  console.log("Tx signature:", sig);
+
+  await connection.confirmTransaction(
+    { signature: sig, blockhash, lastValidBlockHeight },
+    "confirmed"
+  );
 
   console.log("initializeCollection SUCCESS — PDA:", collectionStatePda.toString());
 
@@ -232,30 +208,8 @@ export async function initializeCollection(
 
 // ── getCollections ────────────────────────────────────────────────────────────
 
-/**
- * Anchor discriminator for CollectionState.
- * = sha256("account:CollectionState")[0..8]
- */
 const COLLECTION_STATE_DISC = Buffer.from([228, 135, 148, 4, 244, 41, 118, 165]);
 
-/**
- * Manually decode a CollectionState account from raw bytes.
- * Avoids Anchor IDL deserialization entirely (which has brittle type-name
- * requirements between IDL versions and causes "_bn" runtime errors).
- *
- * Layout (Borsh):
- *   [8]  discriminator
- *   [4+n] name  (String = u32LE length + UTF-8 bytes)
- *   [4+m] symbol
- *   [8]  supply       u64 LE
- *   [8]  mint_price   u64 LE
- *   [8]  minted_count u64 LE
- *   [32] creator      Pubkey
- *   [32] collection_mint Pubkey
- *   [1]  bump         u8
- *   [1]  authority_bump u8
- *   [1]  public_mint_enabled bool
- */
 function decodeCollectionState(
   pubkey: PublicKey,
   data: Buffer
@@ -266,18 +220,17 @@ function decodeCollectionState(
     const nameLen = data.readUInt32LE(offset); offset += 4;
     const name    = data.subarray(offset, offset + nameLen).toString("utf8"); offset += nameLen;
 
-    const symLen  = data.readUInt32LE(offset); offset += 4;
-    const symbol  = data.subarray(offset, offset + symLen).toString("utf8");  offset += symLen;
+    const symLen = data.readUInt32LE(offset); offset += 4;
+    const symbol = data.subarray(offset, offset + symLen).toString("utf8");  offset += symLen;
 
-    const supply      = Number(data.readBigUInt64LE(offset)); offset += 8;
+    const supply        = Number(data.readBigUInt64LE(offset)); offset += 8;
     const mintPriceLamp = Number(data.readBigUInt64LE(offset)); offset += 8;
-    const mintedCount = Number(data.readBigUInt64LE(offset)); offset += 8;
+    const mintedCount   = Number(data.readBigUInt64LE(offset)); offset += 8;
 
     const creator        = new PublicKey(data.subarray(offset, offset + 32)); offset += 32;
     const collectionMint = new PublicKey(data.subarray(offset, offset + 32)); offset += 32;
     offset += 1; // bump
     offset += 1; // authority_bump
-    // public_mint_enabled: default true for old accounts that lack the field
     const publicMintEnabled = offset < data.length ? data[offset] !== 0 : true;
 
     return {
@@ -292,22 +245,15 @@ function decodeCollectionState(
       _creator:          creator,
     };
   } catch {
-    return null; // malformed account — skip silently
+    return null;
   }
 }
 
-/**
- * Fetch all CollectionState PDAs owned by a given creator wallet.
- * Uses raw getProgramAccounts + manual Borsh decoding to avoid Anchor IDL
- * deserialization issues.
- */
 export async function getCollections(
   walletPubkey: PublicKey
 ): Promise<CollectionInfo[]> {
   const accounts = await connection.getProgramAccounts(PROGRAM_ID, {
     filters: [
-      // Match the 8-byte discriminator to only fetch CollectionState accounts
-      // bytes is base58-encoded by default in @solana/web3.js getProgramAccounts
       { memcmp: { offset: 0, bytes: bs58.encode(COLLECTION_STATE_DISC) } },
     ],
   });
@@ -325,10 +271,6 @@ export async function getCollections(
 
 // ── getCollectionByAddress ───────────────────────────────────────────────────
 
-/**
- * Fetch and decode a single CollectionState PDA by its address.
- * Returns null if the account doesn't exist or is malformed.
- */
 export async function getCollectionByAddress(
   pdaAddress: string
 ): Promise<CollectionInfo | null> {
@@ -347,34 +289,49 @@ export async function getCollectionByAddress(
 
 // ── togglePublicMint ─────────────────────────────────────────────────────────
 
-/**
- * Call toggle_public_mint to enable or disable public minting for a collection.
- * Only the collection creator can call this.
- */
 export async function togglePublicMint(
   wallet: AnchorWallet,
   collectionStatePda: string,
   collectionMint: string,
   enabled: boolean
 ): Promise<void> {
-  const program = makeProgram(wallet);
-  await program.methods
-    .togglePublicMint(enabled)
-    .accounts({
-      creator:         wallet.publicKey,
-      collection:      new PublicKey(collectionMint),
-      collectionState: new PublicKey(collectionStatePda),
-      systemProgram:   SystemProgram.programId,
-    })
-    .rpc();
+  const data = Buffer.concat([
+    DISC_TOGGLE_PUBLIC_MINT,
+    encodeBool(enabled),
+  ]);
+
+  const keys: AccountMeta[] = [
+    { pubkey: wallet.publicKey,                   isSigner: true,  isWritable: true  },
+    { pubkey: new PublicKey(collectionMint),       isSigner: false, isWritable: false },
+    { pubkey: new PublicKey(collectionStatePda),   isSigner: false, isWritable: true  },
+    { pubkey: SystemProgram.programId,             isSigner: false, isWritable: false },
+  ];
+
+  const instruction = new TransactionInstruction({
+    programId: PROGRAM_ID,
+    keys,
+    data,
+  });
+
+  const { blockhash, lastValidBlockHeight } =
+    await connection.getLatestBlockhash();
+
+  const tx = new Transaction();
+  tx.recentBlockhash = blockhash;
+  tx.feePayer        = wallet.publicKey;
+  tx.add(instruction);
+
+  const signed = await wallet.signTransaction(tx);
+  const sig    = await connection.sendRawTransaction(signed.serialize());
+
+  await connection.confirmTransaction(
+    { signature: sig, blockhash, lastValidBlockHeight },
+    "confirmed"
+  );
 }
 
 // ── sendDonation ──────────────────────────────────────────────────────────────
 
-/**
- * Transfer `amountSol` SOL from `wallet` to the platform wallet.
- * Returns the transaction signature.
- */
 export async function sendDonation(
   wallet: AnchorWallet,
   amountSol: number
@@ -407,9 +364,7 @@ export async function sendDonation(
 
 // ── checkBalance ─────────────────────────────────────────────────────────────
 
-/** Returns true if the wallet has enough SOL to pay the platform fee + rent. */
 export async function hasSufficientBalance(pubkey: PublicKey): Promise<boolean> {
   const balance = await connection.getBalance(pubkey);
-  // 0.15 SOL fee + 0.01 SOL buffer for rent / tx fees
   return balance >= (PLATFORM_FEE_SOL + 0.01) * LAMPORTS_PER_SOL;
 }

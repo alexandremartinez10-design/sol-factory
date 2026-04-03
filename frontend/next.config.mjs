@@ -23,12 +23,20 @@ const nextConfig = {
         os: false,
         path: false,
         crypto: false,
-        // Provide the `buffer` npm package as the Buffer polyfill
+        // Provide the `buffer` npm package as the Buffer polyfill.
+        // This must match the instance imported explicitly in lib/solana.ts
+        // so that Buffer.isBuffer() checks inside @coral-xyz/anchor pass.
         buffer: require.resolve("buffer/"),
+        stream: require.resolve("stream-browserify"),
+        process: require.resolve("process/browser"),
       };
-      // Make Buffer available as a global (required by @coral-xyz/anchor in browser)
+      // Make Buffer and process available as globals so any module that
+      // references them without importing works in the browser bundle.
       config.plugins.push(
-        new webpack.ProvidePlugin({ Buffer: ["buffer", "Buffer"] })
+        new webpack.ProvidePlugin({
+          Buffer:  ["buffer", "Buffer"],
+          process: ["process"],
+        })
       );
     }
     // Silence optional pino-pretty peer dep warning from WalletConnect

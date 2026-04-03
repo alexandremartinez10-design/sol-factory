@@ -4,6 +4,15 @@
  * Network: devnet  —  RPC: clusterApiUrl("devnet")
  */
 
+// Explicit Buffer import — ensures the same Buffer instance used by this module
+// matches the one expected by @coral-xyz/anchor's borsh encoder in the browser.
+// webpack 5's ProvidePlugin global and an explicit import can be different
+// instances, causing Buffer.isBuffer() to return false ("Expected Buffer" error).
+import { Buffer } from "buffer";
+if (typeof globalThis !== "undefined" && !globalThis.Buffer) {
+  (globalThis as typeof globalThis & { Buffer: typeof Buffer }).Buffer = Buffer;
+}
+
 import {
   Connection,
   Keypair,

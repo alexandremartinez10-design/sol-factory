@@ -15,7 +15,6 @@ import {
   SystemProgram,
   Transaction,
   TransactionInstruction,
-  clusterApiUrl,
 } from "@solana/web3.js";
 import bs58 from "bs58";
 
@@ -35,7 +34,14 @@ export const PLATFORM_WALLET = new PublicKey(
 
 export const PLATFORM_FEE_SOL = 0.15;
 
-export const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
+// Browser → /api/rpc proxy (keeps Helius key off the client, avoids 403).
+// Server (API routes, SSR) → real RPC URL directly.
+const RPC_ENDPOINT =
+  typeof window === "undefined"
+    ? (process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.mainnet-beta.solana.com")
+    : "/api/rpc";
+
+export const connection = new Connection(RPC_ENDPOINT, "confirmed");
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

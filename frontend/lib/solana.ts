@@ -153,29 +153,68 @@ export async function initializeCollection(
 
   const program = makeProgram(wallet);
 
-  await program.methods
-    .initializeCollection(
-      name,
-      symbol,
-      new BN(supply),
-      new BN(Math.floor(mintPriceSol * LAMPORTS_PER_SOL)),
-      metadataUri
-    )
-    .accounts({
-      creator:             wallet.publicKey,
-      platformWallet:      PLATFORM_WALLET,
-      collection:          collectionKeypair.publicKey,
-      nftMint:             nftMintKeypair.publicKey,
-      collectionState:     collectionStatePda,
-      collectionAuthority: collectionAuthority,
-      mplCoreProgram:      MPL_CORE_PROGRAM,
-      systemProgram:       SystemProgram.programId,
-    })
-    .signers([collectionKeypair, nftMintKeypair])
-    .rpc();
+  const mintPriceLamports = Math.floor(mintPriceSol * LAMPORTS_PER_SOL);
+
+  // ── Debug logging — share these logs when reporting "Expected Buffer" ────────
+  console.log("=== initializeCollection DEBUG ===");
+  console.log("IDL version :", IDL.version);
+  console.log("IDL address :", IDL.address);
+  console.log("Program ID  :", program.programId.toString());
+  console.log("BN import OK:", typeof BN, new BN(1).toString());
+  console.log("Buffer OK   :", typeof Buffer, Buffer.isBuffer(Buffer.from([1])));
+  console.log("--- params ---");
+  console.log("wallet      :", wallet.publicKey.toString());
+  console.log("name        :", name);
+  console.log("symbol      :", symbol);
+  console.log("supply      :", supply, "→ BN:", new BN(supply).toString());
+  console.log("mintPrice   :", mintPriceSol, "SOL →", mintPriceLamports, "lamports → BN:", new BN(mintPriceLamports).toString());
+  console.log("metadataUri :", metadataUri);
+  console.log("--- accounts ---");
+  console.log("creator            :", wallet.publicKey.toString());
+  console.log("platformWallet     :", PLATFORM_WALLET.toString());
+  console.log("collection         :", collectionKeypair.publicKey.toString());
+  console.log("nftMint            :", nftMintKeypair.publicKey.toString());
+  console.log("collectionState    :", collectionStatePda.toString());
+  console.log("collectionAuthority:", collectionAuthority.toString());
+  console.log("mplCoreProgram     :", MPL_CORE_PROGRAM.toString());
+  console.log("systemProgram      :", SystemProgram.programId.toString());
+  console.log("=================================");
+
+  try {
+    await program.methods
+      .initializeCollection(
+        name,
+        symbol,
+        new BN(supply),
+        new BN(mintPriceLamports),
+        metadataUri
+      )
+      .accounts({
+        creator:             wallet.publicKey,
+        platformWallet:      PLATFORM_WALLET,
+        collection:          collectionKeypair.publicKey,
+        nftMint:             nftMintKeypair.publicKey,
+        collectionState:     collectionStatePda,
+        collectionAuthority: collectionAuthority,
+        mplCoreProgram:      MPL_CORE_PROGRAM,
+        systemProgram:       SystemProgram.programId,
+      })
+      .signers([collectionKeypair, nftMintKeypair])
+      .rpc();
+  } catch (err) {
+    console.error("=== initializeCollection ERROR ===");
+    console.error("message :", err instanceof Error ? err.message : String(err));
+    console.error("name    :", err instanceof Error ? err.name : "unknown");
+    console.error("stack   :", err instanceof Error ? err.stack : "no stack");
+    console.error("full err:", JSON.stringify(err, Object.getOwnPropertyNames(err instanceof Error ? err : {})));
+    console.error("=================================");
+    throw err;
+  }
+
+  console.log("initializeCollection SUCCESS — PDA:", collectionStatePda.toString());
 
   return {
-    address:       collectionStatePda.toString(),
+    address:        collectionStatePda.toString(),
     collectionMint: collectionKeypair.publicKey.toString(),
   };
 }

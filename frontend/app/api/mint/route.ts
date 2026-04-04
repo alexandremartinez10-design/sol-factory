@@ -9,7 +9,11 @@ import {
 } from "@solana/web3.js";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { IDL } from "@/lib/idl";
-import { MPL_CORE_PROGRAM, PROGRAM_ID } from "@/lib/solana";
+
+// Inline constants to avoid importing lib/solana server-side.
+// lib/solana creates a browser Connection at module level which fails on the server.
+const PROGRAM_ID     = new PublicKey("133wgvX88vqPu8qYEVm18aWgTn1CVtYjcEUXvmnyeWWN");
+const MPL_CORE_PROGRAM = new PublicKey("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
 
 export const runtime = "nodejs";
 

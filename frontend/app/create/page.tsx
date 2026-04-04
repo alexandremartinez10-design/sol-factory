@@ -281,11 +281,13 @@ function CreateForm() {
         formData.append("name", name);
         formData.append("symbol", symbol);
 
+        console.time("upload");
         console.log("[upload] Starting POST /api/upload", { name, symbol, fileSize: imageFile!.size, fileType: imageFile!.type });
         const uploadRes = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         });
+        console.timeEnd("upload");
         console.log("[upload] Response status:", uploadRes.status, uploadRes.ok ? "OK" : "FAILED");
         if (!uploadRes.ok) {
           const body = await uploadRes.json().catch(() => ({}));
@@ -296,6 +298,7 @@ function CreateForm() {
         console.log("[upload] Success:", uploadJson);
         ({ imageUrl, metadataUri } = uploadJson);
       } catch (uploadErr) {
+        console.timeEnd("upload");
         // Upload not configured (no PRIVATE_KEY in env) — fall back to test metadata
         console.warn("[upload] Caught error, using fallback metadata:", uploadErr instanceof Error ? uploadErr.message : uploadErr);
         const slug = encodeURIComponent(name);

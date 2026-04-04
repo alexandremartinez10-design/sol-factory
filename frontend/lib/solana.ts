@@ -43,10 +43,10 @@ function getConnection(): Connection {
   if (!_connection) {
     const httpEndpoint = window.location.origin + "/api/rpc";
     const wsEndpoint   = process.env.NEXT_PUBLIC_HELIUS_WS_URL;
-    _connection = new Connection(
-      httpEndpoint,
-      wsEndpoint ? { commitment: "confirmed", wsEndpoint } : "confirmed"
-    );
+    _connection = new Connection(httpEndpoint, {
+      commitment:  "confirmed",
+      wsEndpoint:  wsEndpoint ?? undefined,
+    });
   }
   return _connection;
 }
@@ -190,11 +190,14 @@ export async function initializeCollection(
     data,
   });
 
-  // Fetch blockhash as the very last step before building — caller must ensure
-  // all slow async work (Pinata upload, etc.) is done before calling this function.
+  // Fetch blockhash immediately before building — all slow async (Pinata) is done by now.
+  console.time("blockhash");
   const { blockhash, lastValidBlockHeight } =
-    await getConnection().getLatestBlockhash("finalized");
+    await getConnection().getLatestBlockhash("confirmed");
+  console.log("blockhash:", blockhash, "lastValidBlockHeight:", lastValidBlockHeight);
+  console.timeEnd("blockhash");
 
+  console.time("build-tx");
   const tx = new Transaction();
   tx.recentBlockhash = blockhash;
   tx.feePayer        = wallet.publicKey;
@@ -207,12 +210,15 @@ export async function initializeCollection(
 
   // partialSign with generated keypairs, then prompt wallet (fast — no more async after this).
   tx.partialSign(collectionKeypair, nftMintKeypair);
-  const signed = await wallet.signTransaction(tx);
+  console.timeEnd("build-tx");
 
+  console.time("send-tx");
+  const signed = await wallet.signTransaction(tx);
   console.log("Sending initializeCollection transaction...");
   const sig = await getConnection().sendRawTransaction(signed.serialize(), {
     skipPreflight: true,
   });
+  console.timeEnd("send-tx");
   console.log("Tx signature:", sig);
 
   await getConnection().confirmTransaction(

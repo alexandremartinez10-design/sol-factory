@@ -43,10 +43,11 @@ function getConnection(): Connection {
   if (!_connection) {
     const httpEndpoint = window.location.origin + "/api/rpc";
     const wsEndpoint   = process.env.NEXT_PUBLIC_HELIUS_WS_URL;
-    _connection = new Connection(httpEndpoint, {
-      commitment:  "confirmed",
-      wsEndpoint:  wsEndpoint ?? undefined,
-    });
+    // Only set wsEndpoint if explicitly configured — avoids auto-derived
+    // wss://solfactory.pro/api/rpc which fails and spams reconnect retries.
+    _connection = wsEndpoint
+      ? new Connection(httpEndpoint, { commitment: "confirmed", wsEndpoint })
+      : new Connection(httpEndpoint, "confirmed");
   }
   return _connection;
 }
@@ -134,7 +135,7 @@ export interface InitCollectionParams {
 
 export async function initializeCollection(
   params: InitCollectionParams
-): Promise<{ address: string; collectionMint: string }> {
+): Promise<{ address: string; collectionMint: string; signature: string }> {
   const { wallet, name, symbol, supply, mintPriceSol, metadataUri } = params;
 
   const collectionKeypair = Keypair.generate();
@@ -220,17 +221,13 @@ export async function initializeCollection(
   });
   console.timeEnd("send-tx");
   console.log("Tx signature:", sig);
-
-  await getConnection().confirmTransaction(
-    { signature: sig, blockhash, lastValidBlockHeight },
-    "confirmed"
-  );
-
-  console.log("initializeCollection SUCCESS — PDA:", collectionStatePda.toString());
+  // Don't await confirmation here — caller redirects immediately to /success
+  // which polls for confirmation in the background.
 
   return {
     address:        collectionStatePda.toString(),
     collectionMint: collectionKeypair.publicKey.toString(),
+    signature:      sig,
   };
 }
 

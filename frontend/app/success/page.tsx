@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Copy, Check, ExternalLink, Loader2, Twitter, Rocket, Link2 } from "lucide-react";
 import { NftPreviewCard } from "@/components/NftPreviewCard";
 import { truncateAddress } from "@/lib/utils";
+import { getConnection } from "@/lib/solana";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -16,10 +17,50 @@ function SuccessContent() {
   const supply     = Number(searchParams.get("supply")    || 100);
   const mintPrice  = Number(searchParams.get("mintPrice") || 0.05);
   const simulated  = searchParams.get("simulated") === "true";
+  const signature  = searchParams.get("signature") || "";
 
   const [copied, setCopied]             = useState(false);
   const [copiedMintLink, setCopiedMintLink] = useState(false);
+  const [confirming, setConfirming]     = useState(!!signature && !simulated);
+  const [confirmError, setConfirmError] = useState("");
   const displayImage = imageParam;
+
+  // Poll for on-chain confirmation when a signature is present
+  useEffect(() => {
+    if (!signature || simulated) return;
+    let cancelled = false;
+    let attempts  = 0;
+    const MAX_ATTEMPTS = 30; // 30 × 2s = 60s max
+
+    async function poll() {
+      while (!cancelled && attempts < MAX_ATTEMPTS) {
+        try {
+          const result = await getConnection().getSignatureStatuses([signature]);
+          const status = result?.value?.[0];
+          if (status && !status.err && (status.confirmationStatus === "confirmed" || status.confirmationStatus === "finalized")) {
+            if (!cancelled) setConfirming(false);
+            return;
+          }
+          if (status?.err) {
+            if (!cancelled) {
+              setConfirmError("Transaction failed on-chain. Check the Explorer link.");
+              setConfirming(false);
+            }
+            return;
+          }
+        } catch { /* network hiccup, keep polling */ }
+        attempts++;
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+      if (!cancelled) {
+        // Timed out — show success anyway, tx may still confirm
+        setConfirming(false);
+      }
+    }
+
+    poll();
+    return () => { cancelled = true; };
+  }, [signature, simulated]);
 
   function handleCopy() {
     if (!address) return;
@@ -42,8 +83,12 @@ function SuccessContent() {
       ? `solfactory.pro/mint/${address.slice(0, 8)}…${address.slice(-4)}${simulated ? "?devnet=true" : ""}`
       : "";
 
-  const explorerCluster = "devnet";
-  const explorerUrl     = `https://explorer.solana.com/address/${address}?cluster=${explorerCluster}`;
+  const explorerUrl = simulated
+    ? `https://explorer.solana.com/address/${address}?cluster=devnet`
+    : `https://explorer.solana.com/address/${address}`;
+  const txExplorerUrl = signature
+    ? (simulated ? `https://explorer.solana.com/tx/${signature}?cluster=devnet` : `https://explorer.solana.com/tx/${signature}`)
+    : "";
   const pageUrl         = typeof window !== "undefined" ? window.location.href : "";
 
   // Twitter / X share text differs for simulation vs real launch
@@ -71,6 +116,19 @@ function SuccessContent() {
       <div className="w-full max-w-lg mx-auto space-y-8 text-center animate-fade-up">
         {/* Celebration */}
         <div className="text-7xl">{simulated ? "✨" : "🎉"}</div>
+
+        {/* On-chain confirmation banner */}
+        {confirming && (
+          <div className="flex items-center justify-center gap-3 rounded-xl border border-purple-500/30 bg-purple-500/10 px-4 py-3 text-sm text-purple-300">
+            <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+            Confirming on Solana… this takes a few seconds
+          </div>
+        )}
+        {confirmError && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            {confirmError}
+          </div>
+        )}
 
         {/* Simulation badge */}
         {simulated && (

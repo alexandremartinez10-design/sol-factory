@@ -319,7 +319,7 @@ function CreateForm() {
         signAllTransactions,
       };
 
-      const { address: collectionState, collectionMint } = await initializeCollection({
+      const { address: collectionState, collectionMint, signature } = await initializeCollection({
         wallet,
         name,
         symbol,
@@ -334,13 +334,8 @@ function CreateForm() {
       if (collectionMode === "loyalty") {
         await togglePublicMint(wallet, collectionState, collectionMint, false);
       }
-      await new Promise((r) => setTimeout(r, 300));
 
-      // Step 4: Almost there
-      setCurrentStep(steps[3]);
-      setCurrentStepIndex(3);
-      await new Promise((r) => setTimeout(r, 400));
-
+      // Redirect immediately — /success polls for on-chain confirmation in background
       const params = new URLSearchParams({
         name,
         address: collectionState,
@@ -348,6 +343,7 @@ function CreateForm() {
         symbol,
         supply: String(supply),
         mintPrice: String(mintPrice),
+        signature,
       });
       router.push(`/success?${params.toString()}`);
     } catch (err: unknown) {

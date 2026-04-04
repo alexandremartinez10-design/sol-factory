@@ -40,7 +40,8 @@ export const PLATFORM_FEE_SOL = 0.15;
 let _connection: Connection | undefined;
 function getConnection(): Connection {
   if (!_connection) {
-    _connection = new Connection("/api/rpc", "confirmed");
+    const endpoint = window.location.origin + "/api/rpc";
+    _connection = new Connection(endpoint, "confirmed");
   }
   return _connection;
 }

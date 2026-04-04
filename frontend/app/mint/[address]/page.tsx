@@ -236,7 +236,7 @@ function MintContent({ address }: { address: string }) {
           <div className="relative w-56 h-56 rounded-xl overflow-hidden border border-zinc-700">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={avatarUrl}
+              src={collection?.imageUrl || avatarUrl}
               alt={collection?.name}
               className="w-full h-full object-cover"
               onError={(e) => {

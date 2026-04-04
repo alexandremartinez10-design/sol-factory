@@ -71,6 +71,7 @@ export interface CollectionInfo {
   mintPrice: number;
   collectionMint: string;
   publicMintEnabled: boolean;
+  imageUrl?: string;
   _creator?: PublicKey;
 }
 
@@ -294,6 +295,41 @@ export async function getCollections(
   return results;
 }
 
+// ── fetchCollectionImageUrl ──────────────────────────────────────────────────
+// Reads the mpl-core Collection asset at `collectionMint`, parses the URI,
+// fetches the IPFS metadata JSON, and returns metadata.image.
+
+async function fetchCollectionImageUrl(collectionMint: string): Promise<string | undefined> {
+  try {
+    const pubkey      = new PublicKey(collectionMint);
+    const accountInfo = await getConnection().getAccountInfo(pubkey);
+    if (!accountInfo) return undefined;
+
+    const data = Buffer.from(accountInfo.data);
+    // mpl-core CollectionV1 layout:
+    //   key          u8
+    //   update_auth  u8 discriminant (0=None, 1=Address+32bytes, 2=Collection+32bytes)
+    //   name         u32LE + bytes
+    //   uri          u32LE + bytes
+    let offset = 1; // skip key
+    const uaDisc = data[offset]; offset += 1;
+    if (uaDisc === 1 || uaDisc === 2) offset += 32; // skip pubkey
+
+    const nameLen = data.readUInt32LE(offset); offset += 4 + nameLen;
+    const uriLen  = data.readUInt32LE(offset); offset += 4;
+    const uri     = data.subarray(offset, offset + uriLen).toString("utf8");
+
+    if (!uri) return undefined;
+
+    const metaRes = await fetch(uri);
+    if (!metaRes.ok) return undefined;
+    const meta = await metaRes.json() as { image?: string };
+    return meta.image ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // ── getCollectionByAddress ───────────────────────────────────────────────────
 
 export async function getCollectionByAddress(
@@ -306,6 +342,7 @@ export async function getCollectionByAddress(
     const decoded = decodeCollectionState(pubkey, Buffer.from(accountInfo.data));
     if (!decoded) return null;
     const { _creator: _, ...info } = decoded;
+    info.imageUrl = await fetchCollectionImageUrl(info.collectionMint);
     return info;
   } catch {
     return null;

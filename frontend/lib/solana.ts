@@ -205,7 +205,7 @@ export async function initializeCollection(
 
   // Priority fee goes first to guarantee it's applied.
   tx.add(
-    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100_000 })
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 10_000 })
   );
   tx.add(instruction);
 

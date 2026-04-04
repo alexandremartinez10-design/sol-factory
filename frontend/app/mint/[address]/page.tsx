@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { WalletButton }                        from "@/components/WalletButton";
-import { getCollectionByAddress, connection }  from "@/lib/solana";
+import { getCollectionByAddress, getConnection } from "@/lib/solana";
 import type { CollectionInfo }                 from "@/lib/solana";
 import { cn }                                  from "@/lib/utils";
 
@@ -155,8 +155,8 @@ function MintContent({ address }: { address: string }) {
       const signedTx = await signTransaction(tx);
 
       setMintState("confirming");
-      const sig = await connection.sendRawTransaction(signedTx.serialize());
-      await connection.confirmTransaction(
+      const sig = await getConnection().sendRawTransaction(signedTx.serialize());
+      await getConnection().confirmTransaction(
         { signature: sig, blockhash: data.blockhash!, lastValidBlockHeight: data.lastValidBlockHeight! },
         "confirmed"
       );

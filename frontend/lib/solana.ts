@@ -34,14 +34,18 @@ export const PLATFORM_WALLET = new PublicKey(
 
 export const PLATFORM_FEE_SOL = 0.15;
 
-// Browser → /api/rpc (Helius key stays server-side, avoids 403).
-// Server (imported by API routes at build/runtime) → direct Helius URL.
-const RPC_ENDPOINT =
-  typeof window === "undefined"
-    ? (process.env.HELIUS_RPC_URL ?? "https://api.mainnet-beta.solana.com")
-    : "/api/rpc";
+// Lazy singleton — Connection is created on first use, never at module load.
+// This prevents server-side evaluation from trying to instantiate a
+// browser-only relative URL ('/api/rpc') during Next.js static generation.
+let _connection: Connection | undefined;
+function getConnection(): Connection {
+  if (!_connection) {
+    _connection = new Connection("/api/rpc", "confirmed");
+  }
+  return _connection;
+}
 
-export const connection = new Connection(RPC_ENDPOINT, "confirmed");
+export { getConnection };
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -181,7 +185,7 @@ export async function initializeCollection(
   });
 
   const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash();
+    await getConnection().getLatestBlockhash();
 
   const tx = new Transaction();
   tx.recentBlockhash = blockhash;
@@ -193,13 +197,13 @@ export async function initializeCollection(
   const signed = await wallet.signTransaction(tx);
 
   console.log("Sending initializeCollection transaction...");
-  const sig = await connection.sendRawTransaction(signed.serialize(), {
+  const sig = await getConnection().sendRawTransaction(signed.serialize(), {
     skipPreflight: false,
     preflightCommitment: "confirmed",
   });
   console.log("Tx signature:", sig);
 
-  await connection.confirmTransaction(
+  await getConnection().confirmTransaction(
     { signature: sig, blockhash, lastValidBlockHeight },
     "confirmed"
   );
@@ -258,7 +262,7 @@ function decodeCollectionState(
 export async function getCollections(
   walletPubkey: PublicKey
 ): Promise<CollectionInfo[]> {
-  const accounts = await connection.getProgramAccounts(PROGRAM_ID, {
+  const accounts = await getConnection().getProgramAccounts(PROGRAM_ID, {
     filters: [
       { memcmp: { offset: 0, bytes: bs58.encode(COLLECTION_STATE_DISC) } },
     ],
@@ -282,7 +286,7 @@ export async function getCollectionByAddress(
 ): Promise<CollectionInfo | null> {
   try {
     const pubkey      = new PublicKey(pdaAddress);
-    const accountInfo = await connection.getAccountInfo(pubkey);
+    const accountInfo = await getConnection().getAccountInfo(pubkey);
     if (!accountInfo) return null;
     const decoded = decodeCollectionState(pubkey, Buffer.from(accountInfo.data));
     if (!decoded) return null;
@@ -320,7 +324,7 @@ export async function togglePublicMint(
   });
 
   const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash();
+    await getConnection().getLatestBlockhash();
 
   const tx = new Transaction();
   tx.recentBlockhash = blockhash;
@@ -328,9 +332,9 @@ export async function togglePublicMint(
   tx.add(instruction);
 
   const signed = await wallet.signTransaction(tx);
-  const sig    = await connection.sendRawTransaction(signed.serialize());
+  const sig    = await getConnection().sendRawTransaction(signed.serialize());
 
-  await connection.confirmTransaction(
+  await getConnection().confirmTransaction(
     { signature: sig, blockhash, lastValidBlockHeight },
     "confirmed"
   );
@@ -353,14 +357,14 @@ export async function sendDonation(
   );
 
   const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash();
+    await getConnection().getLatestBlockhash();
   tx.recentBlockhash = blockhash;
   tx.feePayer        = wallet.publicKey;
 
   const signed = await wallet.signTransaction(tx);
-  const sig    = await connection.sendRawTransaction(signed.serialize());
+  const sig    = await getConnection().sendRawTransaction(signed.serialize());
 
-  await connection.confirmTransaction(
+  await getConnection().confirmTransaction(
     { signature: sig, blockhash, lastValidBlockHeight },
     "confirmed"
   );
@@ -371,6 +375,6 @@ export async function sendDonation(
 // ── checkBalance ─────────────────────────────────────────────────────────────
 
 export async function hasSufficientBalance(pubkey: PublicKey): Promise<boolean> {
-  const balance = await connection.getBalance(pubkey);
+  const balance = await getConnection().getBalance(pubkey);
   return balance >= (PLATFORM_FEE_SOL + 0.01) * LAMPORTS_PER_SOL;
 }

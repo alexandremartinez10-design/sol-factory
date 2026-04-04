@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
+import "@solana/wallet-adapter-react-ui/styles.css";
 import { WalletProvider } from "@/components/WalletProvider";
 import { NavBar } from "@/components/NavBar";
 import { SimBanner } from "@/components/SimBanner";

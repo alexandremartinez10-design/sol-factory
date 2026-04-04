@@ -8,6 +8,7 @@ import { Buffer } from "buffer";
 
 import {
   AccountMeta,
+  ComputeBudgetProgram,
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
@@ -189,23 +190,28 @@ export async function initializeCollection(
     data,
   });
 
+  // Fetch blockhash as the very last step before building — caller must ensure
+  // all slow async work (Pinata upload, etc.) is done before calling this function.
+  const { blockhash, lastValidBlockHeight } =
+    await getConnection().getLatestBlockhash("finalized");
+
   const tx = new Transaction();
-  tx.feePayer = wallet.publicKey;
+  tx.recentBlockhash = blockhash;
+  tx.feePayer        = wallet.publicKey;
+
+  // Priority fee goes first to guarantee it's applied.
+  tx.add(
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100_000 })
+  );
   tx.add(instruction);
 
-  // Sign with the generated keypairs first, then hand to wallet for user signature.
-  // Blockhash is fetched as late as possible (after all UI delays) to avoid expiry.
+  // partialSign with generated keypairs, then prompt wallet (fast — no more async after this).
   tx.partialSign(collectionKeypair, nftMintKeypair);
   const signed = await wallet.signTransaction(tx);
 
-  // Fresh blockhash immediately before sending to minimise expiry risk.
-  const { blockhash, lastValidBlockHeight } =
-    await getConnection().getLatestBlockhash();
-  signed.recentBlockhash = blockhash;
-
   console.log("Sending initializeCollection transaction...");
   const sig = await getConnection().sendRawTransaction(signed.serialize(), {
-    skipPreflight: true, // bypass simulation to see real on-chain error
+    skipPreflight: true,
   });
   console.log("Tx signature:", sig);
 

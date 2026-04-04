@@ -1,25 +1,21 @@
-import { type NextRequest, NextResponse } from "next/server";
+export async function POST(request: Request) {
+  const heliusUrl = process.env.HELIUS_RPC_URL;
 
-export async function POST(request: NextRequest) {
-  const HELIUS_URL = process.env.HELIUS_RPC_URL;
-  if (!HELIUS_URL) {
-    return NextResponse.json({ error: "RPC not configured" }, { status: 500 });
+  if (!heliusUrl) {
+    return Response.json({ error: "RPC not configured" }, { status: 500 });
   }
 
   try {
     const body = await request.json();
-
-    const res = await fetch(HELIUS_URL, {
-      method:  "POST",
+    const response = await fetch(heliusUrl, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(body),
+      body: JSON.stringify(body),
     });
-
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
-  } catch (err: unknown) {
-    const e = err as Error;
-    console.error("[api/rpc] proxy error:", e.message);
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    const data = await response.json();
+    return Response.json(data);
+  } catch (error: unknown) {
+    const e = error as Error;
+    return Response.json({ error: e.message }, { status: 500 });
   }
 }

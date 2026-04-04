@@ -161,6 +161,9 @@ function CreateForm() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Clear any stale error state on mount (e.g. expired tx signatures from WSL testing)
+  useEffect(() => { setLaunchError(null); }, []);
+
   // ── Helpers ─────────────────────────────────────────────────────────────
   const VALID_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 

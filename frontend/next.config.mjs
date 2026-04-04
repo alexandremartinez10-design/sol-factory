@@ -9,6 +9,8 @@ const nextConfig = {
       { protocol: "https", hostname: "gateway.irys.xyz" },
       { protocol: "https", hostname: "ui-avatars.com" },
       { protocol: "https", hostname: "arweave.net" },
+      { protocol: "https", hostname: "gateway.pinata.cloud" },
+      { protocol: "https", hostname: "ipfs.io" },
     ],
   },
 

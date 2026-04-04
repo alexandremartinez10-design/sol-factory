@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     const imageData = await imageRes.json() as { IpfsHash: string };
-    const imageUrl  = `https://gateway.pinata.cloud/ipfs/${imageData.IpfsHash}`;
+    const imageUrl  = `https://ipfs.io/ipfs/${imageData.IpfsHash}`;
 
     // ── Upload metadata to Pinata ─────────────────────────────────────────
     const metadata = {
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     const metaData    = await metaRes.json() as { IpfsHash: string };
-    const metadataUri = `https://gateway.pinata.cloud/ipfs/${metaData.IpfsHash}`;
+    const metadataUri = `https://ipfs.io/ipfs/${metaData.IpfsHash}`;
 
     return NextResponse.json({ imageUrl, metadataUri });
 

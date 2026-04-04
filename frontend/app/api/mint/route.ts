@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     const tx = new Transaction();
     tx.recentBlockhash = blockhash;
     tx.feePayer        = buyer;
-    tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100_000 }));
+    tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 5_000 }));
     tx.add(instruction);
 
     // Sign with nftMint keypair; buyer signs client-side

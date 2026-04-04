@@ -199,8 +199,7 @@ export async function initializeCollection(
 
   console.log("Sending initializeCollection transaction...");
   const sig = await getConnection().sendRawTransaction(signed.serialize(), {
-    skipPreflight: false,
-    preflightCommitment: "confirmed",
+    skipPreflight: true, // bypass Phantom simulation to see real on-chain error
   });
   console.log("Tx signature:", sig);
 

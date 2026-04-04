@@ -6,7 +6,6 @@ import {
   PublicKey,
   SystemProgram,
   Transaction,
-  clusterApiUrl,
 } from "@solana/web3.js";
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { IDL } from "@/lib/idl";
@@ -14,7 +13,10 @@ import { MPL_CORE_PROGRAM, PROGRAM_ID } from "@/lib/solana";
 
 export const runtime = "nodejs";
 
-const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+const connection = new Connection(
+  process.env.HELIUS_RPC_URL ?? "https://api.mainnet-beta.solana.com",
+  "confirmed"
+);
 
 /** Manually decode CollectionState fields needed for mint validation. */
 function decodeState(data: Buffer): {

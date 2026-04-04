@@ -1,12 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.mainnet-beta.solana.com";
-
 export async function POST(request: NextRequest) {
+  const HELIUS_URL = process.env.HELIUS_RPC_URL;
+  if (!HELIUS_URL) {
+    return NextResponse.json({ error: "RPC not configured" }, { status: 500 });
+  }
+
   try {
     const body = await request.json();
 
-    const res = await fetch(RPC_URL, {
+    const res = await fetch(HELIUS_URL, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify(body),

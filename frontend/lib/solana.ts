@@ -34,11 +34,11 @@ export const PLATFORM_WALLET = new PublicKey(
 
 export const PLATFORM_FEE_SOL = 0.15;
 
-// Browser → /api/rpc proxy (keeps Helius key off the client, avoids 403).
-// Server (API routes, SSR) → real RPC URL directly.
+// Browser → /api/rpc (Helius key stays server-side, avoids 403).
+// Server (imported by API routes at build/runtime) → direct Helius URL.
 const RPC_ENDPOINT =
   typeof window === "undefined"
-    ? (process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.mainnet-beta.solana.com")
+    ? (process.env.HELIUS_RPC_URL ?? "https://api.mainnet-beta.solana.com")
     : "/api/rpc";
 
 export const connection = new Connection(RPC_ENDPOINT, "confirmed");

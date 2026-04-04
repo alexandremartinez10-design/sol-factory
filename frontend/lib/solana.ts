@@ -34,14 +34,18 @@ export const PLATFORM_WALLET = new PublicKey(
 
 export const PLATFORM_FEE_SOL = 0.15;
 
-// Lazy singleton — Connection is created on first use, never at module load.
-// This prevents server-side evaluation from trying to instantiate a
-// browser-only relative URL ('/api/rpc') during Next.js static generation.
+// Lazy singleton — created on first use (always browser-side).
+// HTTP RPC → /api/rpc proxy (keeps Helius key server-side).
+// WebSocket → Helius directly via NEXT_PUBLIC_HELIUS_WS_URL (proxying WS is not supported).
 let _connection: Connection | undefined;
 function getConnection(): Connection {
   if (!_connection) {
-    const endpoint = window.location.origin + "/api/rpc";
-    _connection = new Connection(endpoint, "confirmed");
+    const httpEndpoint = window.location.origin + "/api/rpc";
+    const wsEndpoint   = process.env.NEXT_PUBLIC_HELIUS_WS_URL;
+    _connection = new Connection(
+      httpEndpoint,
+      wsEndpoint ? { commitment: "confirmed", wsEndpoint } : "confirmed"
+    );
   }
   return _connection;
 }
@@ -185,21 +189,23 @@ export async function initializeCollection(
     data,
   });
 
-  const { blockhash, lastValidBlockHeight } =
-    await getConnection().getLatestBlockhash();
-
   const tx = new Transaction();
-  tx.recentBlockhash = blockhash;
-  tx.feePayer        = wallet.publicKey;
+  tx.feePayer = wallet.publicKey;
   tx.add(instruction);
 
-  // Sign with the generated keypairs first, then hand to wallet
+  // Sign with the generated keypairs first, then hand to wallet for user signature.
+  // Blockhash is fetched as late as possible (after all UI delays) to avoid expiry.
   tx.partialSign(collectionKeypair, nftMintKeypair);
   const signed = await wallet.signTransaction(tx);
 
+  // Fresh blockhash immediately before sending to minimise expiry risk.
+  const { blockhash, lastValidBlockHeight } =
+    await getConnection().getLatestBlockhash();
+  signed.recentBlockhash = blockhash;
+
   console.log("Sending initializeCollection transaction...");
   const sig = await getConnection().sendRawTransaction(signed.serialize(), {
-    skipPreflight: true, // bypass Phantom simulation to see real on-chain error
+    skipPreflight: true, // bypass simulation to see real on-chain error
   });
   console.log("Tx signature:", sig);
 

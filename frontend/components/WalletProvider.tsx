@@ -1,19 +1,19 @@
 "use client";
 
 import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from "@solana/wallet-adapter-react";
-import { type ReactNode } from "react";
-
-// During SSR the ConnectionProvider still constructs a Connection object, so
-// it needs a valid http(s) URL. Client-side we use /api/rpc to keep the
-// Helius key server-side. The SSR value is never used for actual RPC calls.
-const ENDPOINT =
-  typeof window === "undefined"
-    ? "https://api.mainnet-beta.solana.com"
-    : "/api/rpc";
+import { type ReactNode, useState, useEffect } from "react";
 
 export function WalletProvider({ children }: { children: ReactNode }) {
+  // Start with the public endpoint (matches SSR), switch to the proxy after
+  // mount so there's no hydration mismatch on the ConnectionProvider prop.
+  const [endpoint, setEndpoint] = useState("https://api.mainnet-beta.solana.com");
+
+  useEffect(() => {
+    setEndpoint("/api/rpc");
+  }, []);
+
   return (
-    <ConnectionProvider endpoint={ENDPOINT}>
+    <ConnectionProvider endpoint={endpoint}>
       <SolanaWalletProvider wallets={[]} autoConnect={false}>
         {children}
       </SolanaWalletProvider>

@@ -306,7 +306,10 @@ async function fetchCollectionImageUrl(collectionMint: string): Promise<string |
   try {
     const pubkey      = new PublicKey(collectionMint);
     const accountInfo = await getConnection().getAccountInfo(pubkey);
-    if (!accountInfo) return undefined;
+    if (!accountInfo) {
+      console.warn("[fetchCollectionImageUrl] No account found for", collectionMint);
+      return undefined;
+    }
 
     const data = Buffer.from(accountInfo.data);
     // mpl-core CollectionV1 layout:
@@ -316,19 +319,24 @@ async function fetchCollectionImageUrl(collectionMint: string): Promise<string |
     //   uri          u32LE + bytes
     let offset = 1; // skip key
     const uaDisc = data[offset]; offset += 1;
+    console.log("[fetchCollectionImageUrl] key=", data[0], "uaDisc=", uaDisc, "dataLen=", data.length);
     if (uaDisc === 1 || uaDisc === 2) offset += 32; // skip pubkey
 
     const nameLen = data.readUInt32LE(offset); offset += 4 + nameLen;
     const uriLen  = data.readUInt32LE(offset); offset += 4;
     const uri     = data.subarray(offset, offset + uriLen).toString("utf8");
 
+    console.log("[fetchCollectionImageUrl] parsed uri:", uri);
     if (!uri) return undefined;
 
     const metaRes = await fetch(uri);
+    console.log("[fetchCollectionImageUrl] metadata fetch status:", metaRes.status);
     if (!metaRes.ok) return undefined;
     const meta = await metaRes.json() as { image?: string };
+    console.log("[fetchCollectionImageUrl] metadata.image:", meta.image);
     return meta.image ?? undefined;
-  } catch {
+  } catch (e) {
+    console.error("[fetchCollectionImageUrl] error:", e);
     return undefined;
   }
 }

@@ -284,14 +284,17 @@ export async function getCollections(
     ],
   });
 
-  const results: CollectionInfo[] = [];
-  for (const { pubkey, account } of accounts) {
-    const decoded = decodeCollectionState(pubkey, Buffer.from(account.data));
-    if (decoded && decoded._creator!.equals(walletPubkey)) {
-      const { _creator: _, ...info } = decoded;
-      results.push(info);
-    }
-  }
+  const decoded = accounts
+    .map(({ pubkey, account }) => decodeCollectionState(pubkey, Buffer.from(account.data)))
+    .filter((d): d is CollectionInfo => d !== null && d._creator!.equals(walletPubkey));
+
+  // Fetch image URLs in parallel
+  const results = await Promise.all(
+    decoded.map(async ({ _creator: _, ...info }) => {
+      info.imageUrl = await fetchCollectionImageUrl(info.collectionMint);
+      return info;
+    })
+  );
   return results;
 }
 

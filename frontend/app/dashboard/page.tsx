@@ -148,7 +148,7 @@ export default function DashboardPage() {
               minted={c.minted}
               supply={c.supply}
               address={c.address}
-              imageUrl={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=7c3aed&color=fff&size=256`}
+              imageUrl={c.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=7c3aed&color=fff&size=256`}
             />
           ))}
         </div>

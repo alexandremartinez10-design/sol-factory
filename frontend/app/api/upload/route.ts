@@ -103,6 +103,7 @@ export async function POST(request: NextRequest) {
     const metaData    = await metaRes.json() as { IpfsHash: string };
     const metadataUri = `https://ipfs.io/ipfs/${metaData.IpfsHash}`;
 
+    console.log("[upload] Returning imageUrl:", imageUrl, "metadataUri:", metadataUri);
     return NextResponse.json({ imageUrl, metadataUri });
 
   } catch (error: unknown) {

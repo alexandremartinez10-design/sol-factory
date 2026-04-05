@@ -11,6 +11,7 @@ const nextConfig = {
       { protocol: "https", hostname: "arweave.net" },
       { protocol: "https", hostname: "gateway.pinata.cloud" },
       { protocol: "https", hostname: "ipfs.io" },
+      { protocol: "https", hostname: "cloudflare-ipfs.com" },
     ],
   },
 

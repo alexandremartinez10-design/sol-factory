@@ -336,16 +336,10 @@ function CreateForm() {
       }
 
       // Redirect immediately — /success polls for on-chain confirmation in background
-      const params = new URLSearchParams({
-        name,
-        address: collectionState,
-        image: imageUrl,
-        symbol,
-        supply: String(supply),
-        mintPrice: String(mintPrice),
-        signature,
-      });
-      router.push(`/success?${params.toString()}`);
+      console.log("[create] imageUrl being passed to /success:", imageUrl);
+      router.push(
+        `/success?name=${encodeURIComponent(name)}&address=${encodeURIComponent(collectionState)}&image=${encodeURIComponent(imageUrl)}&symbol=${encodeURIComponent(symbol)}&supply=${supply}&mintPrice=${mintPrice}&signature=${encodeURIComponent(signature)}`
+      );
     } catch (err: unknown) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const e = err as any;

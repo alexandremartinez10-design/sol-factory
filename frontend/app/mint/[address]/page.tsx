@@ -90,33 +90,6 @@ function MintContent({ address }: { address: string }) {
         setCollection(mockCollection);
         setSimMode(true);
       } else {
-        // If imageUrl wasn't populated (e.g. IPFS timeout), fetch it directly here
-        if (!info.imageUrl && info.collectionMint) {
-          try {
-            const conn = getConnection();
-            const acct = await conn.getAccountInfo(new (await import("@solana/web3.js")).PublicKey(info.collectionMint));
-            if (acct) {
-              const d = Buffer.from(acct.data);
-              let off = 1;
-              const uaDisc = d[off]; off += 1;
-              if (uaDisc === 1 || uaDisc === 2) off += 32;
-              const nameLen = d.readUInt32LE(off); off += 4 + nameLen;
-              const uriLen  = d.readUInt32LE(off); off += 4;
-              const uri     = d.subarray(off, off + uriLen).toString("utf8");
-              console.log("[mint page] collectionMint uri:", uri);
-              if (uri) {
-                const metaRes = await fetch(uri);
-                if (metaRes.ok) {
-                  const meta = await metaRes.json() as { image?: string };
-                  console.log("[mint page] metadata.image:", meta.image);
-                  info.imageUrl = meta.image;
-                }
-              }
-            }
-          } catch (imgErr) {
-            console.warn("[mint page] direct image fetch failed:", imgErr);
-          }
-        }
         setCollection(info);
         setSimMode(false);
       }

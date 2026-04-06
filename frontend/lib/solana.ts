@@ -299,38 +299,46 @@ export async function getCollections(
 }
 
 // ── fetchCollectionImageUrl ──────────────────────────────────────────────────
-// Reads the mpl-core Collection asset at `collectionMint`, parses the URI,
-// fetches the IPFS metadata JSON, and returns metadata.image.
+// Uses Helius DAS API (getAsset) to get the image URL for a mpl-core collection.
+// No manual Borsh parsing — the RPC returns structured JSON metadata directly.
 
 async function fetchCollectionImageUrl(collectionMint: string): Promise<string | undefined> {
   try {
-    const pubkey      = new PublicKey(collectionMint);
-    const accountInfo = await getConnection().getAccountInfo(pubkey);
-    if (!accountInfo) {
-      console.warn("[fetchCollectionImageUrl] No account found for", collectionMint);
-      return undefined;
-    }
+    const rpcEndpoint = typeof window !== "undefined"
+      ? window.location.origin + "/api/rpc"
+      : "https://api.mainnet-beta.solana.com";
 
-    const data = Buffer.from(accountInfo.data);
-    // mpl-core CollectionV1 layout:
-    //   key          u8
-    //   update_auth  u8 discriminant (0=None, 1=Address+32bytes, 2=Collection+32bytes)
-    //   name         u32LE + bytes
-    //   uri          u32LE + bytes
-    let offset = 1; // skip key
-    const uaDisc = data[offset]; offset += 1;
-    console.log("[fetchCollectionImageUrl] key=", data[0], "uaDisc=", uaDisc, "dataLen=", data.length);
-    if (uaDisc === 1 || uaDisc === 2) offset += 32; // skip pubkey
+    const res = await fetch(rpcEndpoint, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        jsonrpc: "2.0",
+        id:      1,
+        method:  "getAsset",
+        params:  { id: collectionMint },
+      }),
+    });
 
-    const nameLen = data.readUInt32LE(offset); offset += 4 + nameLen;
-    const uriLen  = data.readUInt32LE(offset); offset += 4;
-    const uri     = data.subarray(offset, offset + uriLen).toString("utf8");
+    const json = await res.json() as {
+      result?: {
+        content?: {
+          links?: { image?: string };
+          json_uri?: string;
+        };
+      };
+    };
 
-    console.log("[fetchCollectionImageUrl] parsed uri:", uri);
-    if (!uri) return undefined;
+    console.log("[fetchCollectionImageUrl] getAsset result for", collectionMint, json.result?.content);
 
-    const metaRes = await fetch(uri);
-    console.log("[fetchCollectionImageUrl] metadata fetch status:", metaRes.status);
+    // Try direct image link first (DAS fills this from metadata.image)
+    const directImage = json.result?.content?.links?.image;
+    if (directImage) return directImage;
+
+    // Fallback: fetch the metadata JSON and extract image
+    const jsonUri = json.result?.content?.json_uri;
+    if (!jsonUri) return undefined;
+
+    const metaRes = await fetch(jsonUri);
     if (!metaRes.ok) return undefined;
     const meta = await metaRes.json() as { image?: string };
     console.log("[fetchCollectionImageUrl] metadata.image:", meta.image);

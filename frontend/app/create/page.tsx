@@ -299,12 +299,8 @@ function CreateForm() {
         ({ imageUrl, metadataUri } = uploadJson);
       } catch (uploadErr) {
         console.timeEnd("upload");
-        // Upload not configured (no PRIVATE_KEY in env) — fall back to test metadata
-        console.warn("[upload] Caught error, using fallback metadata:", uploadErr instanceof Error ? uploadErr.message : uploadErr);
-        const slug = encodeURIComponent(name);
-        imageUrl   = `https://ui-avatars.com/api/?name=${slug}&background=7c3aed&color=fff&size=512&bold=true`;
-        metadataUri = imageUrl;
-        setUploadWarning("Upload not configured — using test metadata");
+        console.error("[upload] FAILED — not falling back:", uploadErr instanceof Error ? uploadErr.message : uploadErr);
+        throw new Error(`Image upload failed: ${uploadErr instanceof Error ? uploadErr.message : String(uploadErr)}`);
       }
 
       console.log("[create] Passing to initializeCollection:", { name, symbol, supply, mintPrice, metadataUri });

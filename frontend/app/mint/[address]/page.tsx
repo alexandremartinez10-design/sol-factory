@@ -90,6 +90,31 @@ function MintContent({ address }: { address: string }) {
         setCollection(mockCollection);
         setSimMode(true);
       } else {
+        // If imageUrl wasn't resolved by getCollectionByAddress, call getAsset directly
+        if (!info.imageUrl && info.collectionMint) {
+          try {
+            const assetRes = await fetch("/api/rpc", {
+              method:  "POST",
+              headers: { "Content-Type": "application/json" },
+              body:    JSON.stringify({
+                jsonrpc: "2.0",
+                id:      "1",
+                method:  "getAsset",
+                params:  { id: info.collectionMint },
+              }),
+            });
+            const assetData = await assetRes.json() as {
+              result?: { content?: { links?: { image?: string }; files?: { uri?: string }[]; json_uri?: string } };
+            };
+            console.log("[mint page] getAsset content:", assetData.result?.content);
+            info.imageUrl =
+              assetData.result?.content?.links?.image ||
+              assetData.result?.content?.files?.[0]?.uri ||
+              undefined;
+          } catch (e) {
+            console.warn("[mint page] getAsset failed:", e);
+          }
+        }
         setCollection(info);
         setSimMode(false);
       }

@@ -34,10 +34,11 @@ export async function POST(request: NextRequest) {
     }
 
     const pinataJWT = process.env.PINATA_JWT;
+    console.log("[upload] PINATA_JWT present:", !!pinataJWT, "length:", pinataJWT?.length ?? 0);
     if (!pinataJWT) {
-      console.error("PINATA_JWT is not set");
+      console.error("[upload] PINATA_JWT is not set in environment variables");
       return NextResponse.json(
-        { error: "Upload service is not configured." },
+        { error: "PINATA_JWT environment variable is not configured in Vercel." },
         { status: 500 }
       );
     }

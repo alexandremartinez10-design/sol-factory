@@ -332,9 +332,11 @@ function CreateForm() {
       }
 
       // Redirect immediately — /success polls for on-chain confirmation in background
+      console.log("[create] collectionState (PDA):", collectionState);
+      console.log("[create] collectionMint (mpl-core asset):", collectionMint);
       console.log("[create] imageUrl being passed to /success:", imageUrl);
       router.push(
-        `/success?name=${encodeURIComponent(name)}&address=${encodeURIComponent(collectionState)}&image=${encodeURIComponent(imageUrl)}&symbol=${encodeURIComponent(symbol)}&supply=${supply}&mintPrice=${mintPrice}&signature=${encodeURIComponent(signature)}`
+        `/success?name=${encodeURIComponent(name)}&address=${encodeURIComponent(collectionState)}&collectionMint=${encodeURIComponent(collectionMint)}&image=${encodeURIComponent(imageUrl)}&symbol=${encodeURIComponent(symbol)}&supply=${supply}&mintPrice=${mintPrice}&signature=${encodeURIComponent(signature)}`
       );
     } catch (err: unknown) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

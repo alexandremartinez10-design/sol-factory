@@ -47,8 +47,9 @@ type MintState = "idle" | "preparing" | "signing" | "confirming" | "done" | "err
 
 // ── Inner component (uses useSearchParams — wrapped in Suspense below) ────────
 function MintContent({ address }: { address: string }) {
-  const searchParams = useSearchParams();
-  const isDevnetParam = searchParams?.get("devnet") === "true";
+  const searchParams      = useSearchParams();
+  const isDevnetParam     = searchParams?.get("devnet") === "true";
+  const collectionMintParam = searchParams?.get("collectionMint") || "";
 
   const { publicKey, connected, signTransaction } = useWallet();
 
@@ -88,16 +89,17 @@ function MintContent({ address }: { address: string }) {
       // 1. Try CollectionState PDA decode
       const info = await getCollectionByAddress(address);
       if (info) {
-        // Fetch image via getAsset using the mpl-core collection address
-        if (!info.imageUrl && info.collectionMint) {
+        // Prefer the collectionMint from URL param (passed explicitly from create page)
+        const mintAddress = collectionMintParam || info.collectionMint;
+        if (!info.imageUrl && mintAddress) {
           try {
-            console.log("[mint page] getAsset for collectionMint:", info.collectionMint);
+            console.log("[mint page] getAsset for collectionMint:", mintAddress);
             const assetRes = await fetch("/api/rpc", {
               method:  "POST",
               headers: { "Content-Type": "application/json" },
               body:    JSON.stringify({
                 jsonrpc: "2.0", id: "1", method: "getAsset",
-                params:  { id: info.collectionMint },
+                params:  { id: mintAddress },
               }),
             });
             const assetData = await assetRes.json();
@@ -106,6 +108,8 @@ function MintContent({ address }: { address: string }) {
               assetData.result?.content?.links?.image ||
               assetData.result?.content?.files?.[0]?.uri ||
               undefined;
+            // Store the correct collectionMint in info
+            info.collectionMint = mintAddress;
           } catch (e) {
             console.warn("[mint page] getAsset failed:", e);
           }

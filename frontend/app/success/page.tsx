@@ -10,9 +10,10 @@ import { getConnection } from "@/lib/solana";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const name       = searchParams.get("name")      || "Your Collection";
-  const address    = searchParams.get("address")   || "";
-  const imageParam = searchParams.get("image")     || "";
+  const name           = searchParams.get("name")           || "Your Collection";
+  const address        = searchParams.get("address")        || "";
+  const collectionMint = searchParams.get("collectionMint") || "";
+  const imageParam     = searchParams.get("image")          || "";
   const symbol     = searchParams.get("symbol")    || "SYM";
   const supply     = Number(searchParams.get("supply")    || 100);
   const mintPrice  = Number(searchParams.get("mintPrice") || 0.05);
@@ -69,11 +70,16 @@ function SuccessContent() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function mintUrl() {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://solfactory.pro";
+    if (simulated) return `${origin}/mint/${address}?devnet=true`;
+    const params = collectionMint ? `?collectionMint=${collectionMint}` : "";
+    return `${origin}/mint/${address}${params}`;
+  }
+
   function handleCopyMintLink() {
     if (!address) return;
-    const origin   = typeof window !== "undefined" ? window.location.origin : "https://solfactory.pro";
-    const suffix   = simulated ? "?devnet=true" : "";
-    navigator.clipboard.writeText(`${origin}/mint/${address}${suffix}`);
+    navigator.clipboard.writeText(mintUrl());
     setCopiedMintLink(true);
     setTimeout(() => setCopiedMintLink(false), 2000);
   }

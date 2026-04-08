@@ -66,6 +66,12 @@ export async function POST(request: NextRequest) {
     const imageData = await imageRes.json() as { IpfsHash: string };
     const imageUrl  = `https://ipfs.io/ipfs/${imageData.IpfsHash}`;
 
+    console.log("Building metadata with image:", imageUrl);
+    if (!imageUrl || imageUrl.includes("ui-avatars")) {
+      console.error("[upload] imageUrl is invalid or placeholder:", imageUrl);
+      return NextResponse.json({ error: "Image upload did not return a valid IPFS URL" }, { status: 500 });
+    }
+
     // ── Upload metadata to Pinata ─────────────────────────────────────────
     const metadata = {
       name,

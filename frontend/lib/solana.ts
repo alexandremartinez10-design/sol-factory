@@ -127,6 +127,7 @@ export function deriveCollectionAuthority(
 
 export interface InitCollectionParams {
   wallet: AnchorWallet;
+  sendTransaction: (tx: Transaction, connection: import("@solana/web3.js").Connection, opts?: { skipPreflight?: boolean }) => Promise<string>;
   name: string;
   symbol: string;
   supply: number;
@@ -137,7 +138,7 @@ export interface InitCollectionParams {
 export async function initializeCollection(
   params: InitCollectionParams
 ): Promise<{ address: string; collectionMint: string; signature: string }> {
-  const { wallet, name, symbol, supply, mintPriceSol, metadataUri } = params;
+  const { wallet, sendTransaction, name, symbol, supply, mintPriceSol, metadataUri } = params;
 
   const collectionKeypair = Keypair.generate();
   const nftMintKeypair    = Keypair.generate();
@@ -210,16 +211,14 @@ export async function initializeCollection(
   );
   tx.add(instruction);
 
-  // partialSign with generated keypairs, then prompt wallet (fast — no more async after this).
+  // partialSign with generated keypairs FIRST (Phantom Lighthouse requirement),
+  // then wallet.sendTransaction signs as fee payer and broadcasts.
   tx.partialSign(collectionKeypair, nftMintKeypair);
   console.timeEnd("build-tx");
 
   console.time("send-tx");
-  const signed = await wallet.signTransaction(tx);
   console.log("Sending initializeCollection transaction...");
-  const sig = await getConnection().sendRawTransaction(signed.serialize(), {
-    skipPreflight: true,
-  });
+  const sig = await sendTransaction(tx, getConnection(), { skipPreflight: true });
   console.timeEnd("send-tx");
   console.log("Tx signature:", sig);
   // Don't await confirmation here — caller redirects immediately to /success

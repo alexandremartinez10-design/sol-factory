@@ -136,7 +136,7 @@ function CreateForm() {
     };
   }, []);
   const isDevnet = searchParams.get("devnet") === "true";
-  const { connected, publicKey, signTransaction, signAllTransactions } =
+  const { connected, publicKey, signTransaction, signAllTransactions, sendTransaction } =
     useWallet();
   const router = useRouter();
 
@@ -315,6 +315,7 @@ function CreateForm() {
 
       const { address: collectionState, collectionMint, signature } = await initializeCollection({
         wallet,
+        sendTransaction,
         name,
         symbol,
         supply,

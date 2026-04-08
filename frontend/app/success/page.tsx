@@ -104,10 +104,10 @@ function SuccessContent() {
   // Twitter / X share text differs for simulation vs real launch
   const tweetText = simulated
     ? encodeURIComponent(
-        `I just designed my NFT collection "${name}" in 60s on @SolFactory! 🚀 Check the preview: ${pageUrl}`
+        `I just designed my NFT collection "${name}" in 60s on @solfactory_pro! 🚀 Check the preview: ${pageUrl}`
       )
     : encodeURIComponent(
-        `I just launched my NFT collection "${name}" on @SolFactory in 60 seconds! 🔥 No code, just vibes. Check it out: ${explorerUrl}`
+        `I just launched my NFT collection "${name}" on @solfactory_pro in 60 seconds! 🔥 No code, just vibes. Check it out: ${explorerUrl}`
       );
   const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
 

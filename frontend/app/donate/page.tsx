@@ -59,13 +59,13 @@ export default function DonatePage() {
 
         <div className="flex flex-col sm:flex-row gap-3">
           <a
-            href="https://twitter.com/SolFactory"
+            href="https://x.com/solfactory_pro"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2.5 flex-1 px-5 py-3 rounded-xl border border-zinc-600 bg-transparent text-zinc-200 text-sm font-semibold hover:border-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all duration-150"
           >
             <Twitter className="w-4 h-4 text-sky-400" />
-            Contact us on Twitter @SolFactory
+            Contact us on X @solfactory_pro
           </a>
           <a
             href="https://discord.gg/solfactory"

@@ -367,7 +367,7 @@ function MintContent({ address }: { address: string }) {
             )}
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                `I just minted an NFT from "${collection?.name}" on @SolFactory! 🚀`
+                `I just minted an NFT from "${collection?.name}" on @solfactory_pro! 🚀`
               )}`}
               target="_blank"
               rel="noopener noreferrer"

@@ -357,13 +357,21 @@ export async function getCollectionByAddress(
   try {
     const pubkey      = new PublicKey(pdaAddress);
     const accountInfo = await getConnection().getAccountInfo(pubkey);
-    if (!accountInfo) return null;
+    if (!accountInfo) {
+      console.warn("[getCollectionByAddress] No account at", pdaAddress);
+      return null;
+    }
+    console.log("[getCollectionByAddress] account dataLen:", accountInfo.data.length, "owner:", accountInfo.owner.toString());
     const decoded = decodeCollectionState(pubkey, Buffer.from(accountInfo.data));
-    if (!decoded) return null;
+    if (!decoded) {
+      console.warn("[getCollectionByAddress] Failed to decode CollectionState for", pdaAddress);
+      return null;
+    }
     const { _creator: _, ...info } = decoded;
     info.imageUrl = await fetchCollectionImageUrl(info.collectionMint);
     return info;
-  } catch {
+  } catch (e) {
+    console.error("[getCollectionByAddress] error:", e);
     return null;
   }
 }

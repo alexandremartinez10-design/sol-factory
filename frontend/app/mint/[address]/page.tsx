@@ -61,6 +61,7 @@ function MintContent({ address }: { address: string }) {
   const [txSig, setTxSig]               = useState<string>("");
   const [mintedNft, setMintedNft]       = useState<string>("");
   const [simMint, setSimMint]           = useState(false);
+  const [loadError, setLoadError]       = useState<string>("");
 
   // ── Mock collection for sim mode ─────────────────────────────────────────
   const mockCollection: CollectionInfo = {
@@ -77,50 +78,83 @@ function MintContent({ address }: { address: string }) {
   // ── Load collection from chain ────────────────────────────────────────────
   const loadCollection = useCallback(async () => {
     if (isDevnetParam) {
-      // Devnet sim mode: skip RPC, use mock
       setCollection(mockCollection);
       setSimMode(true);
       return;
     }
     setLoadingInfo(true);
+    setLoadError("");
     try {
+      // 1. Try CollectionState PDA decode
       const info = await getCollectionByAddress(address);
-      if (!info) {
-        // Not on-chain → fall back to sim mode gracefully
-        setCollection(mockCollection);
-        setSimMode(true);
-      } else {
-        // If imageUrl wasn't resolved by getCollectionByAddress, call getAsset directly
+      if (info) {
+        // Fetch image via getAsset using the mpl-core collection address
         if (!info.imageUrl && info.collectionMint) {
           try {
-            console.log("[mint page] Fetching asset for address:", info.collectionMint);
+            console.log("[mint page] getAsset for collectionMint:", info.collectionMint);
             const assetRes = await fetch("/api/rpc", {
               method:  "POST",
               headers: { "Content-Type": "application/json" },
               body:    JSON.stringify({
-                jsonrpc: "2.0",
-                id:      "1",
-                method:  "getAsset",
+                jsonrpc: "2.0", id: "1", method: "getAsset",
                 params:  { id: info.collectionMint },
               }),
             });
             const assetData = await assetRes.json();
-            console.log("Helius Response:", JSON.stringify(assetData, null, 2));
+            console.log("Helius Response (collectionMint):", JSON.stringify(assetData, null, 2));
             info.imageUrl =
               assetData.result?.content?.links?.image ||
               assetData.result?.content?.files?.[0]?.uri ||
               undefined;
-            console.log("[mint page] resolved imageUrl:", info.imageUrl);
           } catch (e) {
             console.warn("[mint page] getAsset failed:", e);
           }
         }
         setCollection(info);
         setSimMode(false);
+        return;
       }
-    } catch {
-      setCollection(mockCollection);
-      setSimMode(true);
+
+      // 2. getCollectionByAddress returned null — try getAsset with the URL address
+      //    (address might be the mpl-core collection mint, not the CollectionState PDA)
+      console.log("[mint page] getCollectionByAddress returned null, trying getAsset with:", address);
+      const assetRes = await fetch("/api/rpc", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          jsonrpc: "2.0", id: "1", method: "getAsset",
+          params:  { id: address },
+        }),
+      });
+      const assetData = await assetRes.json();
+      console.log("Helius Response (address):", JSON.stringify(assetData, null, 2));
+
+      const assetName = assetData.result?.content?.metadata?.name as string | undefined;
+      const imageUrl  =
+        assetData.result?.content?.links?.image ||
+        assetData.result?.content?.files?.[0]?.uri ||
+        undefined;
+
+      if (assetName) {
+        // Build partial CollectionInfo from asset data
+        setCollection({
+          address,
+          collectionMint: address,
+          name:              assetName,
+          symbol:            (assetData.result?.content?.metadata?.symbol as string | undefined) ?? "",
+          supply:            0,
+          mintPrice:         0,
+          minted:            0,
+          publicMintEnabled: false,
+          imageUrl,
+        });
+        setSimMode(false);
+      } else {
+        setLoadError("Collection not found on-chain. Check the address and try again.");
+      }
+    } catch (e) {
+      console.error("[mint page] loadCollection error:", e);
+      setLoadError("Failed to load collection. Please try again.");
     } finally {
       setLoadingInfo(false);
     }
@@ -227,6 +261,20 @@ function MintContent({ address }: { address: string }) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+      </div>
+    );
+  }
+
+  // ── Collection not found ──────────────────────────────────────────────────
+  if (loadError) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4 text-center">
+        <AlertCircle className="w-12 h-12 text-red-500" />
+        <h2 className="text-xl font-bold text-white">Collection not found</h2>
+        <p className="text-zinc-400 text-sm max-w-sm">{loadError}</p>
+        <Link href="/dashboard" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+          ← Back to dashboard
+        </Link>
       </div>
     );
   }

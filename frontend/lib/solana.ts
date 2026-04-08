@@ -236,28 +236,45 @@ export async function initializeCollection(
 
 const COLLECTION_STATE_DISC = Buffer.from([228, 135, 148, 4, 244, 41, 118, 165]);
 
+// Read a u64 little-endian without relying on Buffer.readBigUInt64LE
+// (which may not be available in all browser polyfill versions).
+function readU64LE(data: Uint8Array, offset: number): number {
+  const view = new DataView(data.buffer, data.byteOffset + offset, 8);
+  const lo = view.getUint32(0, true);
+  const hi = view.getUint32(4, true);
+  return hi * 0x100000000 + lo;
+}
+
 function decodeCollectionState(
   pubkey: PublicKey,
-  data: Buffer
+  data: Uint8Array
 ): CollectionInfo | null {
   try {
-    let offset = 8; // skip discriminator
+    let offset = 8; // skip 8-byte Anchor discriminator
 
-    const nameLen = data.readUInt32LE(offset); offset += 4;
-    const name    = data.subarray(offset, offset + nameLen).toString("utf8"); offset += nameLen;
+    // name: u32LE length + bytes
+    const nameLen = new DataView(data.buffer, data.byteOffset + offset, 4).getUint32(0, true);
+    offset += 4;
+    const name = new TextDecoder().decode(data.subarray(offset, offset + nameLen));
+    offset += nameLen;
 
-    const symLen = data.readUInt32LE(offset); offset += 4;
-    const symbol = data.subarray(offset, offset + symLen).toString("utf8");  offset += symLen;
+    // symbol: u32LE length + bytes
+    const symLen = new DataView(data.buffer, data.byteOffset + offset, 4).getUint32(0, true);
+    offset += 4;
+    const symbol = new TextDecoder().decode(data.subarray(offset, offset + symLen));
+    offset += symLen;
 
-    const supply        = Number(data.readBigUInt64LE(offset)); offset += 8;
-    const mintPriceLamp = Number(data.readBigUInt64LE(offset)); offset += 8;
-    const mintedCount   = Number(data.readBigUInt64LE(offset)); offset += 8;
+    const supply        = readU64LE(data, offset); offset += 8;
+    const mintPriceLamp = readU64LE(data, offset); offset += 8;
+    const mintedCount   = readU64LE(data, offset); offset += 8;
 
     const creator        = new PublicKey(data.subarray(offset, offset + 32)); offset += 32;
     const collectionMint = new PublicKey(data.subarray(offset, offset + 32)); offset += 32;
     offset += 1; // bump
     offset += 1; // authority_bump
     const publicMintEnabled = offset < data.length ? data[offset] !== 0 : true;
+
+    console.log("[decodeCollectionState] name:", name, "symbol:", symbol, "collectionMint:", collectionMint.toString());
 
     return {
       address:           pubkey.toString(),
@@ -270,7 +287,8 @@ function decodeCollectionState(
       publicMintEnabled,
       _creator:          creator,
     };
-  } catch {
+  } catch (e) {
+    console.error("[decodeCollectionState] parse error:", e);
     return null;
   }
 }

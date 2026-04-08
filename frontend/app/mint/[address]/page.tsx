@@ -47,9 +47,11 @@ type MintState = "idle" | "preparing" | "signing" | "confirming" | "done" | "err
 
 // ── Inner component (uses useSearchParams — wrapped in Suspense below) ────────
 function MintContent({ address }: { address: string }) {
-  const searchParams      = useSearchParams();
-  const isDevnetParam     = searchParams?.get("devnet") === "true";
+  const searchParams        = useSearchParams();
+  const isDevnetParam       = searchParams?.get("devnet") === "true";
   const collectionMintParam = searchParams?.get("collectionMint") || "";
+  // ?pda= holds the CollectionState PDA; address in URL is the mpl-core collection mint
+  const pdaParam            = searchParams?.get("pda") || "";
 
   const { publicKey, connected, signTransaction } = useWallet();
 
@@ -86,43 +88,45 @@ function MintContent({ address }: { address: string }) {
     setLoadingInfo(true);
     setLoadError("");
     try {
-      // 1. Try CollectionState PDA decode
-      const info = await getCollectionByAddress(address);
+      // address = collectionMint (mpl-core asset); pdaParam = CollectionState PDA
+      const pdaAddress = pdaParam || address;
+
+      // 1. Load supply/price/minted from CollectionState PDA
+      const info = await getCollectionByAddress(pdaAddress);
+
+      // 2. Load image from mpl-core asset via getAsset
+      console.log("[mint page] getAsset for collectionMint:", address);
+      let imageUrl: string | undefined;
+      try {
+        const assetRes = await fetch("/api/rpc", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({
+            jsonrpc: "2.0", id: "1", method: "getAsset",
+            params:  { id: address },
+          }),
+        });
+        const assetData = await assetRes.json();
+        console.log("Helius Response:", JSON.stringify(assetData, null, 2));
+        imageUrl =
+          assetData.result?.content?.links?.image ||
+          assetData.result?.content?.files?.[0]?.uri ||
+          undefined;
+      } catch (e) {
+        console.warn("[mint page] getAsset failed:", e);
+      }
+
       if (info) {
-        // Prefer the collectionMint from URL param (passed explicitly from create page)
-        const mintAddress = collectionMintParam || info.collectionMint;
-        if (!info.imageUrl && mintAddress) {
-          try {
-            console.log("[mint page] getAsset for collectionMint:", mintAddress);
-            const assetRes = await fetch("/api/rpc", {
-              method:  "POST",
-              headers: { "Content-Type": "application/json" },
-              body:    JSON.stringify({
-                jsonrpc: "2.0", id: "1", method: "getAsset",
-                params:  { id: mintAddress },
-              }),
-            });
-            const assetData = await assetRes.json();
-            console.log("Helius Response (collectionMint):", JSON.stringify(assetData, null, 2));
-            info.imageUrl =
-              assetData.result?.content?.links?.image ||
-              assetData.result?.content?.files?.[0]?.uri ||
-              undefined;
-            // Store the correct collectionMint in info
-            info.collectionMint = mintAddress;
-          } catch (e) {
-            console.warn("[mint page] getAsset failed:", e);
-          }
-        }
+        info.imageUrl      = imageUrl || info.imageUrl;
+        info.collectionMint = address; // ensure collectionMint = URL address
         setCollection(info);
         setSimMode(false);
         return;
       }
 
-      // 2. getCollectionByAddress returned null — try getAsset with the URL address
-      //    (address might be the mpl-core collection mint, not the CollectionState PDA)
-      console.log("[mint page] getCollectionByAddress returned null, trying getAsset with:", address);
-      const assetRes = await fetch("/api/rpc", {
+      // 3. PDA decode failed — show partial info from getAsset if available
+      console.warn("[mint page] getCollectionByAddress returned null for PDA:", pdaAddress);
+      const assetRes2 = await fetch("/api/rpc", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({
@@ -130,27 +134,24 @@ function MintContent({ address }: { address: string }) {
           params:  { id: address },
         }),
       });
-      const assetData = await assetRes.json();
-      console.log("Helius Response (address):", JSON.stringify(assetData, null, 2));
-
-      const assetName = assetData.result?.content?.metadata?.name as string | undefined;
-      const imageUrl  =
-        assetData.result?.content?.links?.image ||
-        assetData.result?.content?.files?.[0]?.uri ||
+      const assetData2 = await assetRes2.json();
+      const assetName = assetData2.result?.content?.metadata?.name as string | undefined;
+      const assetImage =
+        assetData2.result?.content?.links?.image ||
+        assetData2.result?.content?.files?.[0]?.uri ||
         undefined;
 
       if (assetName) {
-        // Build partial CollectionInfo from asset data
         setCollection({
-          address,
-          collectionMint: address,
+          address:           pdaAddress,
+          collectionMint:    address,
           name:              assetName,
-          symbol:            (assetData.result?.content?.metadata?.symbol as string | undefined) ?? "",
+          symbol:            (assetData2.result?.content?.metadata?.symbol as string | undefined) ?? "",
           supply:            0,
           mintPrice:         0,
           minted:            0,
           publicMintEnabled: false,
-          imageUrl,
+          imageUrl:          assetImage,
         });
         setSimMode(false);
       } else {
@@ -196,7 +197,7 @@ function MintContent({ address }: { address: string }) {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({
-          collectionStatePda: address,
+          collectionStatePda: pdaParam || address,
           buyerPubkey:        publicKey.toString(),
         }),
       });

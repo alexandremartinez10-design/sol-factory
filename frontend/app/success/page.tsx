@@ -73,8 +73,9 @@ function SuccessContent() {
   function mintUrl() {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://solfactory.pro";
     if (simulated) return `${origin}/mint/${address}?devnet=true`;
-    const params = collectionMint ? `?collectionMint=${collectionMint}` : "";
-    return `${origin}/mint/${address}${params}`;
+    // Use collectionMint (mpl-core asset) as the URL slug, pass CollectionState PDA as ?pda=
+    if (collectionMint) return `${origin}/mint/${collectionMint}?pda=${address}`;
+    return `${origin}/mint/${address}`;
   }
 
   function handleCopyMintLink() {

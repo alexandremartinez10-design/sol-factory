@@ -90,9 +90,13 @@ function MintContent({ address }: { address: string }) {
     try {
       // address = collectionMint (mpl-core asset); pdaParam = CollectionState PDA
       const pdaAddress = pdaParam || address;
+      console.log("[mint page] URL slug (collectionMint):", address);
+      console.log("[mint page] ?pda= (CollectionState PDA):", pdaParam || "(none — using slug as PDA)");
+      console.log("[mint page] pdaAddress used for getCollectionByAddress:", pdaAddress);
 
       // 1. Load supply/price/minted from CollectionState PDA
       const info = await getCollectionByAddress(pdaAddress);
+      console.log("[mint page] getCollectionByAddress result:", info ? `OK (name=${info.name}, collectionMint=${info.collectionMint})` : "null");
 
       // 2. Load image from mpl-core asset via getAsset
       console.log("[mint page] getAsset for collectionMint:", address);

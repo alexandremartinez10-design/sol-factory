@@ -26,7 +26,19 @@
       "Read(//c/Users/User/.cargo/bin/**)",
       "Read(//c/Users/User/**)",
       "Bash(find /c/Users/User -name anchor* -maxdepth 5)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"const {PhantomWalletAdapter} = require\\(''./node_modules/@solana/wallet-adapter-wallets''\\); console.log\\(PhantomWalletAdapter.toString\\(\\).slice\\(0, 500\\)\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(grep '\"\"buffer\"\"\\\\|\"\"crypto-browserify\"\"\\\\|\"\"stream-browserify\"\"' package.json)",
+      "Bash(grep -n \"import\" app/mint/[address]/page.tsx)",
+      "Bash(wsl -d Ubuntu -- bash -c \"cd ''/mnt/c/Users/User/Desktop/test app claude code'' && solana program show 133wgvX88vqPu8qYEVm18aWgTn1CVtYjcEUXvmnyeWWN --url mainnet-beta 2>&1\")",
+      "Bash(wsl -d Ubuntu -- bash -lc \"cd ''/mnt/c/Users/User/Desktop/test app claude code'' && solana program show 133wgvX88vqPu8qYEVm18aWgTn1CVtYjcEUXvmnyeWWN --url mainnet-beta 2>&1\")",
+      "Bash(wsl -d Ubuntu -- bash -lc \"ls -la ''/mnt/c/Users/User/Desktop/test app claude code/target/deploy/sol_factory.so'' 2>/dev/null || echo ''No existing .so file''\")",
+      "Bash(wsl -d Ubuntu -- bash -lc \"cd ''/mnt/c/Users/User/Desktop/test app claude code'' && anchor build 2>&1 | tail -20\")",
+      "Bash(wsl -d Ubuntu -- bash -lc \"ls -la ''/mnt/c/Users/User/Desktop/test app claude code/target/deploy/sol_factory.so'' 2>/dev/null || echo ''No .so file found''\")",
+      "Bash(find 'C:\\\\Users\\\\User\\\\Desktop\\\\test app claude code\\\\programs' -name *.rs)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

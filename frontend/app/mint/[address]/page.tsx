@@ -218,11 +218,14 @@ function MintContent({ address }: { address: string }) {
       const signedTx = await signTransaction(tx);
 
       setMintState("confirming");
-      const sig = await getConnection().sendRawTransaction(signedTx.serialize());
+      const sig = await getConnection().sendRawTransaction(signedTx.serialize(), { skipPreflight: true });
+      console.log("[mint] tx sent, signature:", sig);
+      console.log("[mint] explorer:", `https://explorer.solana.com/tx/${sig}`);
       await getConnection().confirmTransaction(
         { signature: sig, blockhash: data.blockhash!, lastValidBlockHeight: data.lastValidBlockHeight! },
         "confirmed"
       );
+      console.log("[mint] confirmed! nftMint:", data.nftMint, "buyer:", publicKey.toString());
 
       setTxSig(sig);
       setMintedNft(data.nftMint ?? "");
@@ -253,7 +256,7 @@ function MintContent({ address }: { address: string }) {
   const isMinting     = ["preparing", "signing", "confirming"].includes(mintState);
   const isFullyMinted = collection ? (collection.minted - 1) >= collection.supply : false;
   const explorerUrl   = txSig && !simMint
-    ? `https://explorer.solana.com/tx/${txSig}?cluster=devnet`
+    ? `https://explorer.solana.com/tx/${txSig}`
     : "";
 
   const avatarUrl = collection

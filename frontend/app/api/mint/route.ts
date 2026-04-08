@@ -94,7 +94,35 @@ export async function POST(request: NextRequest) {
     const nftMintKeypair = Keypair.generate();
     const buyer          = new PublicKey(buyerPubkey);
     const nftNumber      = state.mintedCount + 1;
-    const uri            = `https://ui-avatars.com/api/?name=${encodeURIComponent(`${state.name} #${nftNumber}`)}&background=7c3aed&color=fff&size=400`;
+
+    console.log("[api/mint] buyer:", buyerPubkey);
+    console.log("[api/mint] nftMint:", nftMintKeypair.publicKey.toString());
+    console.log("[api/mint] collectionMint:", state.collectionMint.toString());
+    console.log("[api/mint] nftNumber:", nftNumber, "/ supply:", state.supply);
+
+    // Fetch real metadata URI from the mpl-core Collection asset via Helius
+    let uri = `https://ui-avatars.com/api/?name=${encodeURIComponent(`${state.name} #${nftNumber}`)}&background=7c3aed&color=fff&size=400`;
+    try {
+      const heliusUrl = process.env.HELIUS_RPC_URL;
+      if (heliusUrl) {
+        const assetRes = await fetch(heliusUrl, {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({
+            jsonrpc: "2.0", id: 1, method: "getAsset",
+            params:  { id: state.collectionMint.toString() },
+          }),
+        });
+        const assetJson = await assetRes.json() as { result?: { content?: { json_uri?: string } } };
+        const collectionUri = assetJson.result?.content?.json_uri;
+        console.log("[api/mint] collection json_uri from Helius:", collectionUri);
+        if (collectionUri) uri = collectionUri;
+      }
+    } catch (uriErr) {
+      console.warn("[api/mint] Failed to fetch collection URI, using fallback:", uriErr);
+    }
+
+    console.log("[api/mint] NFT uri:", uri);
 
     // Encode instruction data
     const data = Buffer.concat([DISC_MINT_NFT, encodeString(uri)]);

@@ -8,7 +8,6 @@ import { NftPreviewCard } from "@/components/NftPreviewCard";
 import { cn } from "@/lib/utils";
 import {
   initializeCollection,
-  togglePublicMint,
   type AnchorWallet,
 } from "@/lib/solana";
 
@@ -150,7 +149,6 @@ function CreateForm() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
-  const [collectionMode, setCollectionMode] = useState<"drop" | "loyalty">("drop");
   const [isLaunching, setIsLaunching] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -324,12 +322,9 @@ function CreateForm() {
         metadataUri,
       });
 
-      // Step 3: Loyalty Card — disable public minting
+      // Step 3: (reserved for future use)
       setCurrentStep(steps[2]);
       setCurrentStepIndex(2);
-      if (collectionMode === "loyalty") {
-        await togglePublicMint(wallet, collectionState, collectionMint, false);
-      }
 
       // Redirect immediately — /success polls for on-chain confirmation in background
       console.log("[create] collectionState (PDA):", collectionState);
@@ -462,45 +457,6 @@ function CreateForm() {
                     flashPreview();
                   }}
                 />
-              </div>
-            </div>
-
-            {/* Mode toggle */}
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-zinc-300">
-                Collection type
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setCollectionMode("drop")}
-                  className={cn(
-                    "flex flex-col items-start gap-1 rounded-xl border px-4 py-3 text-left transition-all",
-                    collectionMode === "drop"
-                      ? "border-purple-500 bg-purple-500/10 text-white"
-                      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
-                  )}
-                >
-                  <span className="text-sm font-semibold">NFT Drop</span>
-                  <span className="text-xs leading-snug opacity-70">
-                    Anyone can mint — open to the public
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCollectionMode("loyalty")}
-                  className={cn(
-                    "flex flex-col items-start gap-1 rounded-xl border px-4 py-3 text-left transition-all",
-                    collectionMode === "loyalty"
-                      ? "border-purple-500 bg-purple-500/10 text-white"
-                      : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-500"
-                  )}
-                >
-                  <span className="text-sm font-semibold">Loyalty Card</span>
-                  <span className="text-xs leading-snug opacity-70">
-                    You control who receives — no public minting
-                  </span>
-                </button>
               </div>
             </div>
 

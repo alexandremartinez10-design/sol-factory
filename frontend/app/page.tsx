@@ -101,6 +101,40 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Featured Collections ─────────────────────────────────────────── */}
+      <section className="py-16 px-4">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-10">
+            Featured Collections
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-5">
+            {[
+              {
+                name: "test08044",
+                href: "https://solfactory.pro/mint/AVdqT5JVNXZpMdNVunuKzNG9wMhoNFvu1vEzG9C5hpWt",
+              },
+              {
+                name: "tresa",
+                href: "https://solfactory.pro/mint/9ws8z9DcJPkqPEgbuzG6jaP63yCXvqwP5mDSfD926SsC",
+              },
+            ].map((c) => (
+              <div key={c.name} className="card p-6 flex flex-col items-center gap-4 text-center hover:border-zinc-700 transition-all duration-300 hover:-translate-y-1">
+                <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                  <Star className="w-7 h-7 text-purple-400 fill-purple-400/20" />
+                </div>
+                <h3 className="font-bold text-white text-lg">{c.name}</h3>
+                <a
+                  href={c.href}
+                  className="btn-primary text-sm px-6 py-2.5"
+                >
+                  Mint now
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Value Banner ─────────────────────────────────────────────────── */}
       <div
         className="relative w-full py-7 overflow-hidden"

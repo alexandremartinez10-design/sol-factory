@@ -77,17 +77,14 @@ pub mod sol_factory {
             .uri(uri.clone())
             .invoke()?;
 
-        // ── Step 3: Mint NFT #1 to the creator — PDA signs as authority ─────
-        let nft_name       = format!("{} #1", name);
-        let collection_key = ctx.accounts.collection.key();
-        let auth_bump      = ctx.bumps.collection_authority;
+        // ── Step 3: Mint NFT #1 to the creator ──────────────────────────────
+        let nft_name = format!("{} #1", name);
 
         CreateV1CpiBuilder::new(&ctx.accounts.mpl_core_program)
             .asset(&ctx.accounts.nft_mint.to_account_info())
             .collection(Some(&ctx.accounts.collection.to_account_info()))
             .payer(&ctx.accounts.creator.to_account_info())
             .owner(Some(&ctx.accounts.creator.to_account_info()))
-            .authority(Some(&ctx.accounts.collection_authority.to_account_info()))
             .system_program(&ctx.accounts.system_program.to_account_info())
             .name(nft_name)
             .uri(uri)
@@ -95,18 +92,14 @@ pub mod sol_factory {
                 plugin: Plugin::Royalties(Royalties {
                     basis_points: ROYALTY_BPS,
                     creators: vec![Creator {
-                        address:    ctx.accounts.creator.key(),
+                        address: ctx.accounts.creator.key(),
                         percentage: 100,
                     }],
                     rule_set: RuleSet::None,
                 }),
                 authority: None,
             }])
-            .invoke_signed(&[&[
-                b"authority",
-                collection_key.as_ref(),
-                &[auth_bump],
-            ]])?;
+            .invoke()?;
 
         // ── Step 4: Persist CollectionState PDA ─────────────────────────────
         let state = &mut ctx.accounts.collection_state;
@@ -118,7 +111,7 @@ pub mod sol_factory {
         state.creator             = ctx.accounts.creator.key();
         state.collection_mint     = ctx.accounts.collection.key();
         state.bump                = ctx.bumps.collection_state;
-        state.authority_bump      = auth_bump;
+        state.authority_bump      = ctx.bumps.collection_authority;
         state.public_mint_enabled = true;
 
         Ok(())

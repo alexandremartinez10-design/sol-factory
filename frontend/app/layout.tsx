@@ -41,25 +41,55 @@ export default function RootLayout({
             <Suspense fallback={null}><SimBanner /></Suspense>
             {children}
           </main>
-          <footer className="border-t border-zinc-800 py-8 mt-20">
-            <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
-              <p>
-                © {new Date().getFullYear()}{" "}
-                <span className="text-zinc-400 font-semibold">SolFactory</span> · Built on
-                Solana
-              </p>
-              <div className="flex gap-6">
-                <a href="/donate" className="hover:text-zinc-300 transition-colors">
-                  Support
-                </a>
-                <a
-                  href="https://explorer.solana.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-zinc-300 transition-colors"
-                >
-                  Explorer
-                </a>
+          <footer className="border-t border-zinc-800 py-12 mt-20">
+            <div className="mx-auto max-w-7xl px-4 space-y-8">
+              {/* Top row: logo + links */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
+                {/* Logo + tagline */}
+                <div className="flex flex-col items-center sm:items-start gap-1.5">
+                  <span className="text-white font-extrabold text-lg tracking-tight">SolFactory</span>
+                  <p className="text-zinc-500 text-sm">Launch your NFT collection in 60 seconds</p>
+                </div>
+
+                {/* Links */}
+                <div className="flex flex-wrap justify-center sm:justify-end gap-x-6 gap-y-2 text-sm text-zinc-500">
+                  <a
+                    href="https://x.com/solfactory_pro"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-zinc-300 transition-colors"
+                  >
+                    Twitter / X
+                  </a>
+                  <a
+                    href="https://discord.gg/solfactory"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-zinc-300 transition-colors"
+                  >
+                    Discord
+                  </a>
+                  <a href="/terms" className="hover:text-zinc-300 transition-colors">
+                    Terms
+                  </a>
+                  <a
+                    href="https://explorer.solana.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-zinc-300 transition-colors"
+                  >
+                    Explorer
+                  </a>
+                </div>
+              </div>
+
+              {/* Bottom row: copyright + built on */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-6 border-t border-zinc-800/60 text-xs text-zinc-600">
+                <p>© {new Date().getFullYear()} SolFactory. All rights reserved.</p>
+                <p className="flex items-center gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-purple-500" />
+                  Built on Solana
+                </p>
               </div>
             </div>
           </footer>

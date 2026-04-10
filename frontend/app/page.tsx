@@ -1,49 +1,38 @@
 import Link from "next/link";
-import { ImageIcon, DollarSign, Zap, Star } from "lucide-react";
+import { Wallet, Upload, SlidersHorizontal, Zap, Star, Shield, CheckCircle2 } from "lucide-react";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 
-// ── Static data ───────────────────────────────────────────────────────────────
+// ── How it works steps ────────────────────────────────────────────────────────
 
-const FEATURES = [
+const HOW_IT_WORKS = [
   {
-    icon: <ImageIcon className="w-6 h-6 text-purple-400" />,
-    title: "Upload your image",
-    desc: "Drag in any JPG, PNG or GIF. We handle everything else automatically.",
+    icon: <Wallet className="w-6 h-6 text-purple-400" />,
+    title: "Connect Your Wallet",
+    desc: "Connect Phantom or Solflare. No email needed.",
   },
   {
-    icon: <DollarSign className="w-6 h-6 text-purple-400" />,
-    title: "Set your price",
-    desc: "Choose how much each mint costs. Funds go directly to your wallet.",
+    icon: <Upload className="w-6 h-6 text-purple-400" />,
+    title: "Upload Your Artwork",
+    desc: "Drag & drop PNG, JPG or GIF. We handle IPFS automatically.",
+  },
+  {
+    icon: <SlidersHorizontal className="w-6 h-6 text-purple-400" />,
+    title: "Configure Your Collection",
+    desc: "Set mint price, supply. Funds go directly to your wallet.",
   },
   {
     icon: <Zap className="w-6 h-6 text-purple-400" />,
-    title: "Go live instantly",
-    desc: "One click and your collection is on-chain, shareable, and open to buyers.",
+    title: "Go Live in One Click",
+    desc: "Deploy on Solana Mainnet. Get your mint link instantly.",
   },
 ];
 
-const TESTIMONIALS = [
-  {
-    name: "Alex Rivera",
-    handle: "@alexcreates",
-    quote:
-      "I launched my first collection in under 3 minutes. It was live before my coffee was ready.",
-    avatar: "https://ui-avatars.com/api/?name=Alex+Rivera&background=7c3aed&color=fff&size=64",
-  },
-  {
-    name: "Sam Chen",
-    handle: "@samchennft",
-    quote:
-      "I tried three other platforms. This is the only one where I didn't need a tutorial.",
-    avatar: "https://ui-avatars.com/api/?name=Sam+Chen&background=6d28d9&color=fff&size=64",
-  },
-  {
-    name: "Maya Osei",
-    handle: "@mayaart",
-    quote:
-      "Sold out 200 pieces in a day. The simplicity is the whole point.",
-    avatar: "https://ui-avatars.com/api/?name=Maya+Osei&background=a855f7&color=fff&size=64",
-  },
+// ── Trust badges ─────────────────────────────────────────────────────────────
+
+const TRUST_BADGES = [
+  { icon: <Shield className="w-4 h-4" />, label: "Mainnet Ready" },
+  { icon: <CheckCircle2 className="w-4 h-4" />, label: "Phantom Compatible" },
+  { icon: <CheckCircle2 className="w-4 h-4" />, label: "IPFS Storage" },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -89,14 +78,20 @@ export default function HomePage() {
         </div>
 
         {/* Trust badges */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-400">
-          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> One-time fee</span>
-          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> Zero commission</span>
-          <span className="flex items-center gap-1.5"><span className="text-emerald-400">✅</span> Full ownership</span>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          {TRUST_BADGES.map((b) => (
+            <span
+              key={b.label}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-purple-500/25 bg-purple-500/8 text-purple-300 text-xs font-semibold"
+            >
+              {b.icon}
+              {b.label}
+            </span>
+          ))}
         </div>
 
         {/* Animated counter */}
-        <div className="mt-10">
+        <div className="mt-8">
           <AnimatedCounter />
         </div>
       </section>
@@ -123,10 +118,7 @@ export default function HomePage() {
                   <Star className="w-7 h-7 text-purple-400 fill-purple-400/20" />
                 </div>
                 <h3 className="font-bold text-white text-lg">{c.name}</h3>
-                <a
-                  href={c.href}
-                  className="btn-primary text-sm px-6 py-2.5"
-                >
+                <a href={c.href} className="btn-primary text-sm px-6 py-2.5">
                   Mint now
                 </a>
               </div>
@@ -140,7 +132,6 @@ export default function HomePage() {
         className="relative w-full py-7 overflow-hidden"
         style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
       >
-        {/* Inner glow */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -149,37 +140,47 @@ export default function HomePage() {
               "radial-gradient(ellipse 60% 200% at 50% 50%, rgba(255,255,255,0.10) 0%, transparent 70%)",
           }}
         />
-        <p className="relative text-center text-white font-bold text-xl sm:text-2xl px-6 tracking-tight"
-           style={{ textShadow: "0 2px 20px rgba(124,58,237,0.5)" }}>
+        <p
+          className="relative text-center text-white font-bold text-xl sm:text-2xl px-6 tracking-tight"
+          style={{ textShadow: "0 2px 20px rgba(124,58,237,0.5)" }}
+        >
           🔒 Pay 0.15 SOL once. Keep 100% of your royalties. Forever.
         </p>
       </div>
 
-      {/* ── "Most tools are complicated" ──────────────────────────────────── */}
+      {/* ── How it works ─────────────────────────────────────────────────── */}
       <section className="py-24 px-4">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-white">
-              Most NFT tools are too complicated.
-              <br />
-              <span className="gradient-text">This one isn't.</span>
+              How it works
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-6">
-            {FEATURES.map((f, i) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {HOW_IT_WORKS.map((step, i) => (
               <div
                 key={i}
                 className="card p-8 text-center space-y-4 hover:border-zinc-700 transition-all duration-300 hover:-translate-y-1"
               >
-                <div className="inline-flex w-14 h-14 items-center justify-center rounded-2xl bg-purple-500/10 mx-auto">
-                  {f.icon}
+                {/* Step number */}
+                <div className="relative inline-flex mx-auto">
+                  <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                    {step.icon}
+                  </div>
+                  <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] font-bold flex items-center justify-center">
+                    {i + 1}
+                  </span>
                 </div>
-                <h3 className="font-bold text-white text-lg">{f.title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">{f.desc}</p>
+                <h3 className="font-bold text-white text-base">{step.title}</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
+
+          <p className="text-center text-sm text-purple-300 font-medium mt-10">
+            ⚡ Most creators launch in under 60 seconds
+          </p>
         </div>
       </section>
 
@@ -216,34 +217,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Testimonials ──────────────────────────────────────────────────── */}
-      <section className="py-24 px-4 bg-zinc-900/20">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-3xl font-bold text-white text-center mb-16">
-            Creators love it
-          </h2>
-          <div className="grid sm:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="card p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={t.avatar}
-                    alt={t.name}
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <div>
-                    <p className="font-semibold text-white text-sm">{t.name}</p>
-                    <p className="text-xs text-zinc-500">{t.handle}</p>
-                  </div>
-                </div>
-                <blockquote className="text-zinc-300 text-sm leading-relaxed">
-                  &ldquo;{t.quote}&rdquo;
-                </blockquote>
-              </div>
-            ))}
+      {/* ── Transparency note ────────────────────────────────────────────── */}
+      <section className="py-16 px-4">
+        <div className="mx-auto max-w-2xl">
+          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 px-8 py-8 text-center space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">
+              A note from the team
+            </p>
+            <p className="text-zinc-200 text-base leading-relaxed">
+              SolFactory just launched. The first creators are already live.{" "}
+              <span className="text-white font-semibold">
+                Be one of the early ones and get featured while spots are still open.
+              </span>
+            </p>
           </div>
         </div>
       </section>

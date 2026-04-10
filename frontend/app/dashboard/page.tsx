@@ -76,7 +76,7 @@ export default function DashboardPage() {
             {loading ? (
               "Loading…"
             ) : (
-              `${collections.length} collection${collections.length !== 1 ? "s" : ""} on devnet`
+              `${collections.length} collection${collections.length !== 1 ? "s" : ""} on mainnet`
             )}
           </p>
         </div>
@@ -148,6 +148,7 @@ export default function DashboardPage() {
               minted={c.minted}
               supply={c.supply}
               address={c.address}
+              collectionMint={c.collectionMint}
               imageUrl={c.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=7c3aed&color=fff&size=256`}
             />
           ))}

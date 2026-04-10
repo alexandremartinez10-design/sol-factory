@@ -9,7 +9,8 @@ interface CollectionCardProps {
   symbol: string;
   minted: number;
   supply: number;
-  address: string;
+  address: string;       // CollectionState PDA
+  collectionMint: string; // mpl-core Collection asset (used for mint URL)
   imageUrl?: string;
 }
 
@@ -19,6 +20,7 @@ export function CollectionCard({
   minted,
   supply,
   address,
+  collectionMint,
   imageUrl,
 }: CollectionCardProps) {
   const [copied, setCopied]         = useState(false);
@@ -34,7 +36,8 @@ export function CollectionCard({
 
   function handleCopyMintLink() {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    navigator.clipboard.writeText(`${origin}/mint/${address}`);
+    // collectionMint = mpl-core asset (URL slug); address = CollectionState PDA (?pda=)
+    navigator.clipboard.writeText(`${origin}/mint/${collectionMint}?pda=${address}`);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   }
@@ -119,7 +122,7 @@ export function CollectionCard({
           </button>
           <span className="text-zinc-700">·</span>
           <a
-            href={`https://explorer.solana.com/address/${address}?cluster=devnet`}
+            href={`https://explorer.solana.com/address/${address}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors font-medium"

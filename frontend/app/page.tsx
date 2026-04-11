@@ -75,21 +75,28 @@ const ROYALTY_POINTS = [
 ];
 
 // ── Featured collections ──────────────────────────────────────────────────────
+// TODO: replace `img` src values with real IPFS/Arweave image URLs for each collection
 
 const FEATURED = [
   {
     name: "test08044",
     symbol: "T8",
+    creator: "Early Creator",
+    badge: "New",
     href: "https://solfactory.pro/mint/AVdqT5JVNXZpMdNVunuKzNG9wMhoNFvu1vEzG9C5hpWt",
-    gradient: "from-purple-600 to-violet-800",
-    letter: "T",
+    // TODO: remplacer par l'image réelle de la collection (ex: https://ipfs.io/ipfs/<CID>)
+    imgSrc: "https://picsum.photos/seed/sol1/600/600",
+    imgAlt: "NFT artwork from the test08044 collection",
   },
   {
     name: "tresa",
     symbol: "TRS",
+    creator: "Early Creator",
+    badge: "Live",
     href: "https://solfactory.pro/mint/9ws8z9DcJPkqPEgbuzG6jaP63yCXvqwP5mDSfD926SsC",
-    gradient: "from-indigo-600 to-purple-800",
-    letter: "R",
+    // TODO: remplacer par l'image réelle de la collection (ex: https://ipfs.io/ipfs/<CID>)
+    imgSrc: "https://picsum.photos/seed/sol2/600/600",
+    imgAlt: "NFT artwork from the tresa collection",
   },
 ];
 
@@ -202,49 +209,84 @@ export default function HomePage() {
 
       {/* ── Featured Collections ─────────────────────────────────────────── */}
       <section className="py-20 px-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
-        <div className="mx-auto max-w-4xl">
-          <div className="text-center mb-10 space-y-2">
+        <div className="mx-auto max-w-5xl">
+          {/* Section header */}
+          <div className="text-center mb-12 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">
+              On-chain now
+            </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white">
               Featured Collections
             </h2>
-            <p className="text-zinc-500 text-sm">Live on Solana Mainnet</p>
+            <p className="text-zinc-500 text-sm max-w-sm mx-auto">
+              Real collections deployed by real creators — live on Solana Mainnet.
+            </p>
           </div>
-          <div className="grid sm:grid-cols-2 gap-5">
+
+          {/* Grid: 1 col mobile → 2 col sm → up to 3 col lg when more collections exist */}
+          <div className="grid sm:grid-cols-2 gap-6">
             {FEATURED.map((c) => (
               <div
                 key={c.name}
-                className="card p-6 flex flex-col gap-5 hover:border-purple-500/40 hover:-translate-y-1 transition-all duration-300"
+                className="card overflow-hidden group hover:border-purple-500/40 hover:-translate-y-1.5 transition-all duration-300"
               >
-                {/* NFT image placeholder */}
-                <div
-                  className={`w-full aspect-square rounded-xl bg-gradient-to-br ${c.gradient} flex items-center justify-center relative overflow-hidden`}
-                >
-                  {/* Abstract grid pattern */}
+                {/* ── NFT image ── */}
+                {/* TODO: remplacer imgSrc par l'URL IPFS réelle une fois la collection indexée */}
+                <div className="relative w-full aspect-square overflow-hidden bg-zinc-900">
+                  <img
+                    src={c.imgSrc}
+                    alt={c.imgAlt}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+
+                  {/* Gradient overlay at bottom for text legibility */}
                   <div
                     aria-hidden
-                    className="absolute inset-0 opacity-20"
+                    className="absolute inset-x-0 bottom-0 h-2/5 pointer-events-none"
                     style={{
-                      backgroundImage:
-                        "linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)",
-                      backgroundSize: "32px 32px",
+                      background:
+                        "linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 100%)",
                     }}
                   />
-                  <span className="relative text-white font-extrabold text-7xl opacity-30 select-none">
-                    {c.letter}
-                  </span>
-                  <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/40 backdrop-blur-sm text-white text-xs font-semibold">
+
+                  {/* Badge top-left */}
+                  <div className="absolute top-3 left-3">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-sm ${
+                        c.badge === "Live"
+                          ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-300"
+                          : "bg-purple-500/20 border border-purple-500/40 text-purple-300"
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          c.badge === "Live" ? "bg-emerald-400" : "bg-purple-400"
+                        }`}
+                      />
+                      {c.badge === "Live" ? "Live on SolFactory" : "New"}
+                    </span>
+                  </div>
+
+                  {/* Symbol badge top-right */}
+                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/50 backdrop-blur-sm text-white text-[11px] font-bold">
                     {c.symbol}
+                  </div>
+
+                  {/* Collection name + creator overlay bottom */}
+                  <div className="absolute bottom-0 inset-x-0 px-4 py-3">
+                    <p className="font-bold text-white text-base leading-tight">
+                      {c.name}
+                    </p>
+                    <p className="text-zinc-400 text-xs mt-0.5">{c.creator}</p>
                   </div>
                 </div>
 
-                {/* Info */}
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h3 className="font-bold text-white">{c.name}</h3>
-                    <p className="text-xs text-emerald-400 font-medium mt-0.5 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                      Live on Mainnet
-                    </p>
+                {/* ── Card footer ── */}
+                <div className="px-4 py-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Minting open
                   </div>
                   <a
                     href={c.href}

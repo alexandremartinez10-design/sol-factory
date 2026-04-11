@@ -68,7 +68,6 @@ const FEATURES = [
 // ── Royalties breakdown ───────────────────────────────────────────────────────
 
 const ROYALTY_POINTS = [
-  "You set your own royalty percentage (recommended: 5–10%)",
   "With 8% royalties, you earn on every secondary sale — forever",
   "SolFactory takes 0% ongoing commission. Ever.",
   "Royalties are encoded in the smart contract and fully on-chain",
@@ -418,8 +417,8 @@ export default function HomePage() {
                 You keep everything
               </h2>
               <p className="text-zinc-400 text-sm leading-relaxed">
-                Set your own royalty rate at launch. We encoded zero platform fees in
-                the contract — there&apos;s nothing to trust, just read the code.
+                We encoded zero platform fees in the contract — there&apos;s nothing
+                to trust, just read the code.
               </p>
             </div>
 

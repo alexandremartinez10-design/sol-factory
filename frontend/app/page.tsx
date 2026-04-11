@@ -74,29 +74,51 @@ const ROYALTY_POINTS = [
   "Royalties are encoded in the smart contract and fully on-chain",
 ];
 
-// ── Featured collections ──────────────────────────────────────────────────────
-// TODO: replace `img` src values with real IPFS/Arweave image URLs for each collection
+// ── Featured collections (marketing examples — not real user collections) ─────
+// TODO: replace imgSrc values with real curated IPFS artwork when available
 
 const FEATURED = [
   {
-    name: "test08044",
-    symbol: "T8",
-    creator: "Early Creator",
-    badge: "New",
-    href: "https://solfactory.pro/mint/AVdqT5JVNXZpMdNVunuKzNG9wMhoNFvu1vEzG9C5hpWt",
-    // TODO: remplacer par l'image réelle de la collection (ex: https://ipfs.io/ipfs/<CID>)
-    imgSrc: "https://picsum.photos/seed/sol1/600/600",
-    imgAlt: "NFT artwork from the test08044 collection",
+    name: "Cosmic Apes",
+    symbol: "CAPE",
+    supply: "1,000",
+    imgSrc: "https://picsum.photos/seed/cosmicapes/600/600",
+    imgAlt: "Cosmic Apes NFT — generative ape collection on Solana",
   },
   {
-    name: "tresa",
-    symbol: "TRS",
-    creator: "Early Creator",
-    badge: "Live",
-    href: "https://solfactory.pro/mint/9ws8z9DcJPkqPEgbuzG6jaP63yCXvqwP5mDSfD926SsC",
-    // TODO: remplacer par l'image réelle de la collection (ex: https://ipfs.io/ipfs/<CID>)
-    imgSrc: "https://picsum.photos/seed/sol2/600/600",
-    imgAlt: "NFT artwork from the tresa collection",
+    name: "Neon Dreams",
+    symbol: "NDRM",
+    supply: "500",
+    imgSrc: "https://picsum.photos/seed/neondreams/600/600",
+    imgAlt: "Neon Dreams NFT — cyberpunk generative art collection",
+  },
+  {
+    name: "Shadow Legion",
+    symbol: "SLEG",
+    supply: "2,000",
+    imgSrc: "https://picsum.photos/seed/shadowlegion/600/600",
+    imgAlt: "Shadow Legion NFT — dark fantasy warrior collection",
+  },
+  {
+    name: "Pixel Punks",
+    symbol: "PPNK",
+    supply: "888",
+    imgSrc: "https://picsum.photos/seed/pixelpunks/600/600",
+    imgAlt: "Pixel Punks NFT — retro pixel art collection on Solana",
+  },
+  {
+    name: "Aurora Wolves",
+    symbol: "AWLF",
+    supply: "777",
+    imgSrc: "https://picsum.photos/seed/aurorawolves/600/600",
+    imgAlt: "Aurora Wolves NFT — nature-inspired generative collection",
+  },
+  {
+    name: "Void Walkers",
+    symbol: "VOID",
+    supply: "333",
+    imgSrc: "https://picsum.photos/seed/voidwalkers/600/600",
+    imgAlt: "Void Walkers NFT — abstract sci-fi collection on Solana",
   },
 ];
 
@@ -209,29 +231,30 @@ export default function HomePage() {
 
       {/* ── Featured Collections ─────────────────────────────────────────── */}
       <section className="py-20 px-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-6xl">
           {/* Section header */}
           <div className="text-center mb-12 space-y-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">
-              On-chain now
+              Built with SolFactory
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white">
-              Featured Collections
+              Collections on SolFactory
             </h2>
             <p className="text-zinc-500 text-sm max-w-sm mx-auto">
-              Real collections deployed by real creators — live on Solana Mainnet.
+              Launch yours in 60 seconds. No code required.
             </p>
           </div>
 
-          {/* Grid: 1 col mobile → 2 col sm → up to 3 col lg when more collections exist */}
-          <div className="grid sm:grid-cols-2 gap-6">
+          {/* Grid: 2 col mobile → 3 col md → 3 col lg */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
             {FEATURED.map((c) => (
+              /* Non-clickable display card */
               <div
                 key={c.name}
-                className="card overflow-hidden group hover:border-purple-500/40 hover:-translate-y-1.5 transition-all duration-300"
+                className="card overflow-hidden group hover:border-purple-500/40 hover:-translate-y-1.5 transition-all duration-300 cursor-default"
               >
-                {/* ── NFT image ── */}
-                {/* TODO: remplacer imgSrc par l'URL IPFS réelle une fois la collection indexée */}
+                {/* NFT image — 1:1 aspect ratio */}
+                {/* TODO: remplacer imgSrc par l'URL IPFS réelle de la collection */}
                 <div className="relative w-full aspect-square overflow-hidden bg-zinc-900">
                   <img
                     src={c.imgSrc}
@@ -240,64 +263,52 @@ export default function HomePage() {
                     loading="lazy"
                   />
 
-                  {/* Gradient overlay at bottom for text legibility */}
+                  {/* Bottom gradient overlay */}
                   <div
                     aria-hidden
                     className="absolute inset-x-0 bottom-0 h-2/5 pointer-events-none"
                     style={{
                       background:
-                        "linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 100%)",
+                        "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)",
                     }}
                   />
 
-                  {/* Badge top-left */}
-                  <div className="absolute top-3 left-3">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-sm ${
-                        c.badge === "Live"
-                          ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-300"
-                          : "bg-purple-500/20 border border-purple-500/40 text-purple-300"
-                      }`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          c.badge === "Live" ? "bg-emerald-400" : "bg-purple-400"
-                        }`}
-                      />
-                      {c.badge === "Live" ? "Live on SolFactory" : "New"}
-                    </span>
-                  </div>
-
-                  {/* Symbol badge top-right */}
-                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/50 backdrop-blur-sm text-white text-[11px] font-bold">
+                  {/* Symbol tag top-right */}
+                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold tracking-wide">
                     {c.symbol}
                   </div>
 
-                  {/* Collection name + creator overlay bottom */}
-                  <div className="absolute bottom-0 inset-x-0 px-4 py-3">
-                    <p className="font-bold text-white text-base leading-tight">
+                  {/* Supply badge top-left */}
+                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-purple-600/70 backdrop-blur-sm text-white text-[10px] font-semibold">
+                    {c.supply} items
+                  </div>
+
+                  {/* Name overlay bottom */}
+                  <div className="absolute bottom-0 inset-x-0 px-3 py-2.5">
+                    <p className="font-bold text-white text-sm leading-tight truncate">
                       {c.name}
                     </p>
-                    <p className="text-zinc-400 text-xs mt-0.5">{c.creator}</p>
                   </div>
                 </div>
 
-                {/* ── Card footer ── */}
-                <div className="px-4 py-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Minting open
-                  </div>
-                  <a
-                    href={c.href}
-                    className="btn-primary text-sm px-5 py-2 shrink-0"
-                  >
-                    Mint now
-                  </a>
+                {/* Card footer */}
+                <div className="px-3 py-3 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+                  <p className="text-[11px] text-zinc-500 font-medium truncate">
+                    Minted on SolFactory
+                  </p>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* CTA below grid */}
+          <p className="text-center mt-10 text-sm text-zinc-500">
+            Your collection could be here.{" "}
+            <Link href="/create" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
+              Launch yours →
+            </Link>
+          </p>
         </div>
       </section>
 

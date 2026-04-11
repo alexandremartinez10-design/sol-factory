@@ -2,8 +2,8 @@ import Link from "next/link";
 import {
   Wallet, Upload, SlidersHorizontal, Zap, Star,
   DollarSign, TrendingUp, Lock, Cloud, Shield, Rocket,
+  CheckCircle2,
 } from "lucide-react";
-import { AnimatedCounter } from "@/components/AnimatedCounter";
 
 // ── How it works ──────────────────────────────────────────────────────────────
 
@@ -21,7 +21,7 @@ const HOW_IT_WORKS = [
   {
     icon: <SlidersHorizontal className="w-6 h-6 text-purple-400" />,
     title: "Configure Your Collection",
-    desc: "Set mint price, supply. Funds go directly to your wallet.",
+    desc: "Set mint price, supply, and your royalty percentage. Funds go directly to your wallet.",
   },
   {
     icon: <Zap className="w-6 h-6 text-purple-400" />,
@@ -65,6 +65,34 @@ const FEATURES = [
   },
 ];
 
+// ── Royalties breakdown ───────────────────────────────────────────────────────
+
+const ROYALTY_POINTS = [
+  "You set your own royalty percentage (recommended: 5–10%)",
+  "With 8% royalties, you earn on every secondary sale — forever",
+  "SolFactory takes 0% ongoing commission. Ever.",
+  "Royalties are encoded in the smart contract and fully on-chain",
+];
+
+// ── Featured collections ──────────────────────────────────────────────────────
+
+const FEATURED = [
+  {
+    name: "test08044",
+    symbol: "T8",
+    href: "https://solfactory.pro/mint/AVdqT5JVNXZpMdNVunuKzNG9wMhoNFvu1vEzG9C5hpWt",
+    gradient: "from-purple-600 to-violet-800",
+    letter: "T",
+  },
+  {
+    name: "tresa",
+    symbol: "TRS",
+    href: "https://solfactory.pro/mint/9ws8z9DcJPkqPEgbuzG6jaP63yCXvqwP5mDSfD926SsC",
+    gradient: "from-indigo-600 to-purple-800",
+    letter: "R",
+  },
+];
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
@@ -88,7 +116,7 @@ export default function HomePage() {
           style={{ animationDelay: "0ms" }}
         >
           <Star className="w-3.5 h-3.5 fill-current" />
-          Early creators get featured on the homepage
+          Early access — be one of the first creators
         </div>
 
         {/* H1 */}
@@ -150,54 +178,81 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* Trust line */}
+        {/* Royalties note */}
         <p
-          className="animate-fade-up mt-6 text-sm text-zinc-500"
-          style={{ animationDelay: "400ms" }}
+          className="animate-fade-up mt-5 text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed"
+          style={{ animationDelay: "380ms" }}
         >
-          <span className="text-purple-400 font-medium">
-            Early creators get featured on the homepage
-          </span>{" "}
-          — Limited spots available
+          You set your own royalties. SolFactory takes{" "}
+          <span className="text-emerald-400 font-semibold">0% commission</span>{" "}
+          on sales — now and forever.
         </p>
 
-        {/* Animated counter */}
-        <div
-          className="animate-fade-up mt-10"
-          style={{ animationDelay: "480ms" }}
+        {/* Early access note */}
+        <p
+          className="animate-fade-up mt-4 text-sm text-zinc-500"
+          style={{ animationDelay: "440ms" }}
         >
-          <AnimatedCounter />
-        </div>
+          <span className="text-purple-400 font-medium">
+            SolFactory is in early access
+          </span>{" "}
+          — featured spots are limited
+        </p>
       </section>
 
       {/* ── Featured Collections ─────────────────────────────────────────── */}
       <section className="py-20 px-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-10">
-            Featured Collections
-          </h2>
+          <div className="text-center mb-10 space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">
+              Featured Collections
+            </h2>
+            <p className="text-zinc-500 text-sm">Live on Solana Mainnet</p>
+          </div>
           <div className="grid sm:grid-cols-2 gap-5">
-            {[
-              {
-                name: "test08044",
-                href: "https://solfactory.pro/mint/AVdqT5JVNXZpMdNVunuKzNG9wMhoNFvu1vEzG9C5hpWt",
-              },
-              {
-                name: "tresa",
-                href: "https://solfactory.pro/mint/9ws8z9DcJPkqPEgbuzG6jaP63yCXvqwP5mDSfD926SsC",
-              },
-            ].map((c) => (
+            {FEATURED.map((c) => (
               <div
                 key={c.name}
-                className="card p-6 flex flex-col items-center gap-4 text-center hover:border-purple-500/40 hover:-translate-y-1 transition-all duration-300"
+                className="card p-6 flex flex-col gap-5 hover:border-purple-500/40 hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
-                  <Star className="w-7 h-7 text-purple-400 fill-purple-400/20" />
+                {/* NFT image placeholder */}
+                <div
+                  className={`w-full aspect-square rounded-xl bg-gradient-to-br ${c.gradient} flex items-center justify-center relative overflow-hidden`}
+                >
+                  {/* Abstract grid pattern */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)",
+                      backgroundSize: "32px 32px",
+                    }}
+                  />
+                  <span className="relative text-white font-extrabold text-7xl opacity-30 select-none">
+                    {c.letter}
+                  </span>
+                  <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/40 backdrop-blur-sm text-white text-xs font-semibold">
+                    {c.symbol}
+                  </div>
                 </div>
-                <h3 className="font-bold text-white text-lg">{c.name}</h3>
-                <a href={c.href} className="btn-primary text-sm px-6 py-2.5">
-                  Mint now
-                </a>
+
+                {/* Info */}
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-bold text-white">{c.name}</h3>
+                    <p className="text-xs text-emerald-400 font-medium mt-0.5 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                      Live on Mainnet
+                    </p>
+                  </div>
+                  <a
+                    href={c.href}
+                    className="btn-primary text-sm px-5 py-2 shrink-0"
+                  >
+                    Mint now
+                  </a>
+                </div>
               </div>
             ))}
           </div>
@@ -298,6 +353,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Royalties breakdown ───────────────────────────────────────────── */}
+      <section className="py-20 px-4">
+        <div className="mx-auto max-w-3xl">
+          <div className="card p-8 sm:p-10 space-y-6 border-purple-500/20">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">
+                Your Royalties
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                You keep everything
+              </h2>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                Set your own royalty rate at launch. We encoded zero platform fees in
+                the contract — there&apos;s nothing to trust, just read the code.
+              </p>
+            </div>
+
+            <ul className="space-y-3">
+              {ROYALTY_POINTS.map((point) => (
+                <li key={point} className="flex items-start gap-3 text-sm text-zinc-300">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+
+            <div className="pt-2 border-t border-zinc-800">
+              <p className="text-xs text-zinc-500 leading-relaxed">
+                Example: with 8% royalties and 1,000 secondary sales at 1 SOL each →{" "}
+                <span className="text-emerald-400 font-semibold">80 SOL earned passively</span>.
+                SolFactory receives 0 SOL.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Social proof / Transparency note ─────────────────────────────── */}
       <section className="py-16 px-4">
         <div className="mx-auto max-w-2xl">
@@ -329,12 +421,17 @@ export default function HomePage() {
               Launch now while spots are still open. Featured collections get{" "}
               <span className="text-purple-300 font-semibold">10× more visibility</span>.
             </p>
-            <Link
-              href="/create"
-              className="btn-primary text-base px-10 py-4 inline-flex shadow-lg shadow-purple-900/30"
-            >
-              Claim my spot — 0.15 SOL
-            </Link>
+            <div className="flex flex-col items-center gap-3">
+              <Link
+                href="/create"
+                className="btn-primary text-base px-10 py-4 inline-flex shadow-lg shadow-purple-900/30"
+              >
+                Claim my spot — 0.15 SOL
+              </Link>
+              <p className="text-xs text-zinc-600">
+                One-time fee · 0% commission · Your royalties, your rules
+              </p>
+            </div>
           </div>
         </div>
       </section>

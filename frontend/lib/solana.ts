@@ -207,7 +207,7 @@ export async function initializeCollection(
   const tx = new Transaction();
   tx.recentBlockhash = blockhash;
   tx.feePayer        = wallet.publicKey;
-  tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 5_000 }));
+  tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 250_000 }));
   tx.add(instruction);
 
   // ── Step 2: Pre-sign with keypairs BEFORE Phantom ────────────────────────
@@ -276,7 +276,7 @@ export async function initializeCollection(
     );
   }
 
-  // ── Step 6: Send raw — skipPreflight, don't await (success page polls) ───
+  // ── Step 6: Send raw ─────────────────────────────────────────────────────
   console.time("send-raw");
   const sig = await getConnection().sendRawTransaction(
     legacyTx.serialize(),
@@ -285,6 +285,15 @@ export async function initializeCollection(
   console.timeEnd("send-raw");
   console.log("[initializeCollection] Sent:", sig);
   console.log("[initializeCollection] Explorer: https://explorer.solana.com/tx/" + sig);
+
+  // ── Step 7: Wait for confirmation ────────────────────────────────────────
+  console.time("confirm");
+  await getConnection().confirmTransaction(
+    { signature: sig, blockhash, lastValidBlockHeight },
+    "confirmed"
+  );
+  console.timeEnd("confirm");
+  console.log("[initializeCollection] Confirmed on-chain ✓");
 
   return {
     address:        collectionStatePda.toString(),

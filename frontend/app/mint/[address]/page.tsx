@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState, useCallback } from "react";
 import { useParams, useSearchParams }                  from "next/navigation";
 import { useWallet }                                   from "@solana/wallet-adapter-react";
-import { Transaction }                                 from "@solana/web3.js";
+import { Keypair, Transaction }                        from "@solana/web3.js";
 import Link                                            from "next/link";
 import {
   Loader2, ExternalLink, Twitter, AlertCircle,
@@ -209,6 +209,7 @@ function MintContent({ address }: { address: string }) {
       const data = await res.json() as {
         transaction?: string;
         nftMint?: string;
+        nftMintSecretKey?: string;
         lastValidBlockHeight?: number;
         blockhash?: string;
         error?: string;
@@ -216,14 +217,44 @@ function MintContent({ address }: { address: string }) {
 
       if (!res.ok) throw new Error(data.error || "Server error");
       if (!data.transaction) throw new Error("No transaction returned");
+      if (!data.nftMintSecretKey) throw new Error("No mint keypair returned from server");
 
+      // ── Step 1: Build tx object from server's partial tx (no signatures yet) ──
       const tx = Transaction.from(Buffer.from(data.transaction, "base64"));
 
+      // ── Step 2: Phantom signs FIRST ──────────────────────────────────────────
       setMintState("signing");
-      const signedTx = await signTransaction(tx);
+      console.log("[mint] Asking Phantom to sign...");
+      const phantomSignedTx = await signTransaction(tx);
+      console.log("[mint] Phantom signed");
 
+      // ── Step 3: nftMint keypair signs AFTER Phantom ──────────────────────────
+      const nftMintKeypair = Keypair.fromSecretKey(
+        Buffer.from(data.nftMintSecretKey, "base64")
+      );
+      phantomSignedTx.partialSign(nftMintKeypair);
+      console.log("[mint] nftMintKeypair signed");
+
+      // ── Step 4: Simulate before broadcasting ─────────────────────────────────
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const simResult = await getConnection().simulateTransaction(phantomSignedTx, { sigVerify: false } as any);
+      console.log(
+        "[mint] simulate:",
+        simResult.value.err ?? "OK",
+        simResult.value.logs?.slice(0, 15)
+      );
+      if (simResult.value.err) {
+        throw new Error(
+          `Simulation failed: ${JSON.stringify(simResult.value.err)}\nLogs:\n${simResult.value.logs?.join("\n") ?? "(none)"}`
+        );
+      }
+
+      // ── Step 5: Send raw transaction ─────────────────────────────────────────
       setMintState("confirming");
-      const sig = await getConnection().sendRawTransaction(signedTx.serialize(), { skipPreflight: true });
+      const sig = await getConnection().sendRawTransaction(
+        phantomSignedTx.serialize(),
+        { skipPreflight: true }
+      );
       console.log("[mint] tx sent, signature:", sig);
       console.log("[mint] explorer:", `https://explorer.solana.com/tx/${sig}`);
       await getConnection().confirmTransaction(

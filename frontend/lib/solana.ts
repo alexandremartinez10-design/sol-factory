@@ -127,7 +127,6 @@ export function deriveCollectionAuthority(
 
 export interface InitCollectionParams {
   wallet: AnchorWallet;
-  sendTransaction: (tx: Transaction, connection: import("@solana/web3.js").Connection, opts?: { skipPreflight?: boolean }) => Promise<string>;
   name: string;
   symbol: string;
   supply: number;
@@ -138,7 +137,7 @@ export interface InitCollectionParams {
 export async function initializeCollection(
   params: InitCollectionParams
 ): Promise<{ address: string; collectionMint: string; signature: string }> {
-  const { wallet, sendTransaction, name, symbol, supply, mintPriceSol, metadataUri } = params;
+  const { wallet, name, symbol, supply, mintPriceSol, metadataUri } = params;
 
   const collectionKeypair = Keypair.generate();
   const nftMintKeypair    = Keypair.generate();
@@ -200,29 +199,50 @@ export async function initializeCollection(
   console.log("blockhash:", blockhash, "lastValidBlockHeight:", lastValidBlockHeight);
   console.timeEnd("blockhash");
 
+  // ── Step 1: Build transaction — NO partialSign yet ───────────────────────
   console.time("build-tx");
   const tx = new Transaction();
   tx.recentBlockhash = blockhash;
   tx.feePayer        = wallet.publicKey;
-
-  // Priority fee goes first to guarantee it's applied.
-  tx.add(
-    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 5_000 })
-  );
+  tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 5_000 }));
   tx.add(instruction);
-
-  // partialSign with generated keypairs FIRST (Phantom Lighthouse requirement),
-  // then wallet.sendTransaction signs as fee payer and broadcasts.
-  tx.partialSign(collectionKeypair, nftMintKeypair);
   console.timeEnd("build-tx");
 
-  console.time("send-tx");
-  console.log("Sending initializeCollection transaction...");
-  const sig = await sendTransaction(tx, getConnection(), { skipPreflight: true });
-  console.timeEnd("send-tx");
-  console.log("Tx signature:", sig);
-  // Don't await confirmation here — caller redirects immediately to /success
-  // which polls for confirmation in the background.
+  // ── Step 2: Phantom signs FIRST (required for Phantom simulation to pass) ─
+  console.time("phantom-sign");
+  console.log("[initializeCollection] Asking Phantom to sign...");
+  const phantomSignedTx = await wallet.signTransaction(tx);
+  console.timeEnd("phantom-sign");
+
+  // ── Step 3: Keypairs sign AFTER Phantom ──────────────────────────────────
+  phantomSignedTx.partialSign(collectionKeypair, nftMintKeypair);
+  console.log("[initializeCollection] Keypairs signed (collectionKeypair, nftMintKeypair)");
+
+  // ── Step 4: Simulate to catch errors before broadcasting ─────────────────
+  console.time("simulate");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const simResult = await getConnection().simulateTransaction(phantomSignedTx, { sigVerify: false } as any);
+  console.timeEnd("simulate");
+  console.log(
+    "[initializeCollection] simulate:",
+    simResult.value.err ?? "OK",
+    simResult.value.logs?.slice(0, 15)
+  );
+  if (simResult.value.err) {
+    throw new Error(
+      `Simulation failed: ${JSON.stringify(simResult.value.err)}\nLogs:\n${simResult.value.logs?.join("\n") ?? "(none)"}`
+    );
+  }
+
+  // ── Step 5: Send raw — don't await confirmation (success page polls) ──────
+  console.time("send-raw");
+  console.log("[initializeCollection] Sending raw transaction...");
+  const sig = await getConnection().sendRawTransaction(
+    phantomSignedTx.serialize(),
+    { skipPreflight: true }
+  );
+  console.timeEnd("send-raw");
+  console.log("[initializeCollection] Tx signature:", sig);
 
   return {
     address:        collectionStatePda.toString(),

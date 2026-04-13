@@ -148,14 +148,16 @@ export async function POST(request: NextRequest) {
     tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 5_000 }));
     tx.add(instruction);
 
-    // Sign with nftMint keypair; buyer signs client-side
-    tx.partialSign(nftMintKeypair);
-
+    // Do NOT partialSign here — Phantom must sign first client-side (Saul's fix).
+    // We pass the nftMint keypair secret to the client so it can sign AFTER Phantom.
+    // This keypair is freshly generated and holds no funds — safe to transmit over HTTPS.
     const serialized = tx.serialize({ requireAllSignatures: false });
 
     return NextResponse.json({
       transaction:         Buffer.from(serialized).toString("base64"),
       nftMint:             nftMintKeypair.publicKey.toString(),
+      // base64-encoded 64-byte secret key — client applies partialSign after Phantom signs
+      nftMintSecretKey:    Buffer.from(nftMintKeypair.secretKey).toString("base64"),
       mintPrice:           state.mintPrice,
       nftNumber,
       blockhash,

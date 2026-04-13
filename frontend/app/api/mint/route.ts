@@ -145,19 +145,20 @@ export async function POST(request: NextRequest) {
     const tx = new Transaction();
     tx.recentBlockhash = blockhash;
     tx.feePayer        = buyer;
-    tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 5_000 }));
+    tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 250_000 }));
     tx.add(instruction);
 
-    // Do NOT partialSign here — Phantom must sign first client-side (Saul's fix).
-    // We pass the nftMint keypair secret to the client so it can sign AFTER Phantom.
-    // This keypair is freshly generated and holds no funds — safe to transmit over HTTPS.
+    // Pre-sign with nftMintKeypair server-side so Phantom's approval dialog
+    // simulation succeeds (Phantom uses sigVerify:true internally — missing
+    // signatures cause "Invalid arguments"). The buyer (Phantom) then adds
+    // the final signature client-side via wallet.signTransaction.
+    tx.partialSign(nftMintKeypair);
+
     const serialized = tx.serialize({ requireAllSignatures: false });
 
     return NextResponse.json({
       transaction:         Buffer.from(serialized).toString("base64"),
       nftMint:             nftMintKeypair.publicKey.toString(),
-      // base64-encoded 64-byte secret key — client applies partialSign after Phantom signs
-      nftMintSecretKey:    Buffer.from(nftMintKeypair.secretKey).toString("base64"),
       mintPrice:           state.mintPrice,
       nftNumber,
       blockhash,

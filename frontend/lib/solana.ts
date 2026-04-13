@@ -192,57 +192,87 @@ export async function initializeCollection(
     data,
   });
 
-  // Fetch blockhash immediately before building — all slow async (Pinata) is done by now.
+  // Fetch blockhash immediately before signing — keeps it as fresh as possible.
   console.time("blockhash");
   const { blockhash, lastValidBlockHeight } =
     await getConnection().getLatestBlockhash("confirmed");
-  console.log("blockhash:", blockhash, "lastValidBlockHeight:", lastValidBlockHeight);
   console.timeEnd("blockhash");
+  console.log("[initializeCollection] blockhash:", blockhash, "lastValidBlockHeight:", lastValidBlockHeight);
 
-  // ── Step 1: Build transaction — NO partialSign yet ───────────────────────
-  console.time("build-tx");
+  // ── Step 1: Build transaction ─────────────────────────────────────────────
   const tx = new Transaction();
   tx.recentBlockhash = blockhash;
   tx.feePayer        = wallet.publicKey;
   tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 5_000 }));
   tx.add(instruction);
-  console.timeEnd("build-tx");
 
-  // ── Step 2: Phantom signs FIRST (required for Phantom simulation to pass) ─
+  // ── Step 2: Pre-sign with generated keypairs BEFORE Phantom ──────────────
+  // Phantom's internal simulation (shown in the approval dialog) runs with
+  // sigVerify:true — if the two non-wallet signers have no signature yet,
+  // Phantom shows "Invalid arguments" and refuses. Pre-signing here gives
+  // Phantom a fully-signed tx to simulate successfully.
+  // We use wallet.signTransaction (not sendTransaction) to avoid triggering
+  // the Phantom Lighthouse security warning that fires with sendTransaction.
+  console.log("=== PRE-SIGN DEBUG ===");
+  console.log("collectionKeypair type  :", typeof collectionKeypair, collectionKeypair.constructor?.name);
+  console.log("collectionKeypair pubkey:", collectionKeypair.publicKey.toString());
+  console.log("collectionKeypair secretKey length:", collectionKeypair.secretKey.length);
+  console.log("nftMintKeypair type  :", typeof nftMintKeypair, nftMintKeypair.constructor?.name);
+  console.log("nftMintKeypair pubkey:", nftMintKeypair.publicKey.toString());
+  console.log("nftMintKeypair secretKey length:", nftMintKeypair.secretKey.length);
+  console.log("tx.feePayer    :", tx.feePayer?.toString());
+  console.log("tx.recentBlockhash:", tx.recentBlockhash);
+  console.log("tx.instructions count:", tx.instructions.length);
+  tx.instructions.forEach((ix, i) => {
+    console.log(`  ix[${i}] programId:`, ix.programId.toString());
+    console.log(`  ix[${i}] keys:`, ix.keys.map(k => `${k.pubkey.toString().slice(0,8)}… signer=${k.isSigner} writable=${k.isWritable}`));
+    console.log(`  ix[${i}] data (hex):`, Buffer.from(ix.data).toString("hex").slice(0, 64), "...");
+  });
+  console.log("=====================");
+
+  tx.partialSign(collectionKeypair, nftMintKeypair);
+  console.log("[initializeCollection] Keypairs signed. Signature slots:", tx.signatures.map(s => ({
+    pubkey: s.publicKey.toString().slice(0, 8) + "…",
+    signed: s.signature !== null,
+  })));
+
+  // ── Step 3: Phantom signs — simulation inside Phantom now has all sigs ────
   console.time("phantom-sign");
   console.log("[initializeCollection] Asking Phantom to sign...");
   const phantomSignedTx = await wallet.signTransaction(tx);
   console.timeEnd("phantom-sign");
+  console.log("[initializeCollection] Phantom signed. Final signature slots:", phantomSignedTx.signatures.map(s => ({
+    pubkey: s.publicKey.toString().slice(0, 8) + "…",
+    signed: s.signature !== null,
+  })));
 
-  // ── Step 3: Keypairs sign AFTER Phantom ──────────────────────────────────
-  phantomSignedTx.partialSign(collectionKeypair, nftMintKeypair);
-  console.log("[initializeCollection] Keypairs signed (collectionKeypair, nftMintKeypair)");
-
-  // ── Step 4: Simulate to catch errors before broadcasting ─────────────────
+  // ── Step 4: Our own simulation (sigVerify:false — catch program errors) ───
   console.time("simulate");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const simResult = await getConnection().simulateTransaction(phantomSignedTx, { sigVerify: false } as any);
   console.timeEnd("simulate");
   console.log(
-    "[initializeCollection] simulate:",
-    simResult.value.err ?? "OK",
-    simResult.value.logs?.slice(0, 15)
+    "[initializeCollection] simulate result:",
+    simResult.value.err ?? "OK"
   );
+  if (simResult.value.logs?.length) {
+    console.log("[initializeCollection] simulate logs:\n", simResult.value.logs.join("\n"));
+  }
   if (simResult.value.err) {
     throw new Error(
       `Simulation failed: ${JSON.stringify(simResult.value.err)}\nLogs:\n${simResult.value.logs?.join("\n") ?? "(none)"}`
     );
   }
 
-  // ── Step 5: Send raw — don't await confirmation (success page polls) ──────
+  // ── Step 5: Send raw — skip preflight, don't await (success page polls) ──
   console.time("send-raw");
-  console.log("[initializeCollection] Sending raw transaction...");
   const sig = await getConnection().sendRawTransaction(
     phantomSignedTx.serialize(),
     { skipPreflight: true }
   );
   console.timeEnd("send-raw");
-  console.log("[initializeCollection] Tx signature:", sig);
+  console.log("[initializeCollection] Sent. Signature:", sig);
+  console.log("[initializeCollection] Explorer: https://explorer.solana.com/tx/" + sig);
 
   return {
     address:        collectionStatePda.toString(),

@@ -309,8 +309,8 @@ function CreateForm() {
 
       const wallet: AnchorWallet = {
         publicKey,
-        signTransaction,
-        signAllTransactions,
+        signTransaction:     signTransaction!,
+        signAllTransactions: signAllTransactions!,
       };
 
       const { address: collectionState, collectionMint, signature } = await initializeCollection({

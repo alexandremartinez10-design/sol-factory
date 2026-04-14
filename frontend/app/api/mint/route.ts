@@ -148,18 +148,19 @@ export async function POST(request: NextRequest) {
     tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 250_000 }));
     tx.add(instruction);
 
-    // Pre-sign with nftMintKeypair server-side so Phantom's approval dialog
-    // simulation succeeds (Phantom uses sigVerify:true internally — missing
-    // signatures cause "Invalid arguments"). The buyer (Phantom) then adds
-    // the final signature client-side via wallet.signTransaction.
-    tx.partialSign(nftMintKeypair);
-
+    // Do NOT pre-sign here — Blowfish (Phantom's security engine) flags any
+    // transaction that already carries keypair signatures when signTransaction
+    // is called. We send a completely clean transaction so Phantom is always
+    // the FIRST signer. The client uses nftMintSecretKey to sign AFTER Phantom.
     const serialized = tx.serialize({ requireAllSignatures: false });
 
     return NextResponse.json({
-      transaction:         Buffer.from(serialized).toString("base64"),
-      nftMint:             nftMintKeypair.publicKey.toString(),
-      mintPrice:           state.mintPrice,
+      transaction:          Buffer.from(serialized).toString("base64"),
+      nftMint:              nftMintKeypair.publicKey.toString(),
+      // Secret key sent to client so it can sign after Phantom (Blowfish fix).
+      // Safe: nftMint is a freshly-generated keypair holding no funds.
+      nftMintSecretKey:     Buffer.from(nftMintKeypair.secretKey).toString("base64"),
+      mintPrice:            state.mintPrice,
       nftNumber,
       blockhash,
       lastValidBlockHeight,

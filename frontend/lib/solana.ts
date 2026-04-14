@@ -201,92 +201,73 @@ export async function initializeCollection(
   console.timeEnd("blockhash");
   console.log("[initializeCollection] blockhash:", blockhash, "lastValid:", lastValidBlockHeight);
 
-  // ── Step 1: Build legacy Transaction ─────────────────────────────────────
-  // We use a legacy Transaction because Phantom downgrades VersionedTransaction
-  // to legacy internally, which caused serialization mismatches.
-  const tx = new Transaction();
-  tx.recentBlockhash = blockhash;
-  tx.feePayer        = wallet.publicKey;
-  tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 250_000 }));
-  tx.add(instruction);
+  // ── Step 1: Build VersionedTransaction — ZERO signatures ─────────────────
+  // Blowfish (Phantom's security engine) flags any transaction that already
+  // carries keypair signatures when it reaches signTransaction. We send a
+  // completely clean transaction so Phantom is always the FIRST signer.
+  const message = new TransactionMessage({
+    payerKey:        wallet.publicKey,
+    recentBlockhash: blockhash,
+    instructions: [
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 250_000 }),
+      instruction,
+    ],
+  }).compileToV0Message();   // addressTableLookups: [] by default
 
-  // ── Step 2: Pre-sign with keypairs BEFORE Phantom ────────────────────────
-  // Phantom's approval dialog runs an internal simulation. Without these two
-  // signatures the simulation fails and Phantom shows "Invalid arguments".
-  // We use wallet.signTransaction (not sendTransaction) to avoid the Phantom
-  // Lighthouse security warning that triggers with sendTransaction.
+  const versionedTx = new VersionedTransaction(message);
+
   console.log("=== PRE-SIGN DEBUG ===");
-  console.log("feePayer            :", tx.feePayer?.toString());
-  console.log("recentBlockhash     :", tx.recentBlockhash);
-  console.log("instructions        :", tx.instructions.length);
-  console.log("collectionKeypair   :", collectionKeypair.publicKey.toString(), "secretKey:", collectionKeypair.secretKey.length, "bytes");
-  console.log("nftMintKeypair      :", nftMintKeypair.publicKey.toString(),    "secretKey:", nftMintKeypair.secretKey.length,    "bytes");
-  tx.instructions.forEach((ix, i) => {
-    console.log(`  ix[${i}] program:`, ix.programId.toString());
-    console.log(`  ix[${i}] keys   :`, ix.keys.map(k => `${k.pubkey.toString().slice(0, 8)}… s=${k.isSigner} w=${k.isWritable}`));
-  });
+  console.log("feePayer        :", wallet.publicKey.toString());
+  console.log("recentBlockhash :", blockhash);
+  console.log("collectionKeypair:", collectionKeypair.publicKey.toString(), "| secretKey:", collectionKeypair.secretKey.length, "bytes");
+  console.log("nftMintKeypair  :", nftMintKeypair.publicKey.toString(),    "| secretKey:", nftMintKeypair.secretKey.length,    "bytes");
+  console.log("staticAccountKeys:", message.staticAccountKeys.map((k, i) => `[${i}] ${k.toString()}`));
+  console.log("signatures before Phantom:", versionedTx.signatures.map(s => s.every(b => b === 0) ? "empty" : "signed"));
   console.log("=====================");
 
-  tx.partialSign(collectionKeypair, nftMintKeypair);
-  console.log("[initializeCollection] After keypair pre-sign:", tx.signatures.map(s => ({
-    pubkey: s.publicKey.toString().slice(0, 8) + "…",
-    signed: s.signature !== null,
-  })));
-
-  // ── Step 3: Phantom signs via signTransaction ─────────────────────────────
+  // ── Step 2: Phantom signs FIRST on a clean tx (required by Blowfish) ─────
   console.time("phantom-sign");
-  console.log("[initializeCollection] Asking Phantom to sign...");
-  const phantomSignedTx = await wallet.signTransaction(tx);
+  console.log("[initializeCollection] Sending clean tx to Phantom...");
+  const phantomResult = await wallet.signTransaction(versionedTx);
   console.timeEnd("phantom-sign");
+  console.log("[initializeCollection] Phantom signed.");
 
-  const legacyTx = phantomSignedTx as Transaction;
-  console.log("[initializeCollection] After Phantom:", legacyTx.signatures.map(s => ({
-    pubkey: s.publicKey.toString().slice(0, 8) + "…",
-    signed: s.signature !== null,
-  })));
+  // ── Step 3: Keypairs sign AFTER Phantom ──────────────────────────────────
+  // Use the appropriate method depending on whether Phantom returned a
+  // VersionedTransaction or downgraded to a legacy Transaction.
+  let serializedTx: Uint8Array;
 
-  // ── Step 4: Re-apply keypair sigs if Phantom cleared them ────────────────
-  for (const kp of [collectionKeypair, nftMintKeypair]) {
-    const entry = legacyTx.signatures.find(s => s.publicKey.equals(kp.publicKey));
-    if (entry && entry.signature === null) {
-      console.log("[initializeCollection] Re-signing for", kp.publicKey.toString().slice(0, 8));
-      legacyTx.partialSign(kp);
-    }
+  if (phantomResult instanceof VersionedTransaction) {
+    console.log("[initializeCollection] Result is VersionedTransaction — calling .sign([keypairs])");
+    phantomResult.sign([collectionKeypair, nftMintKeypair]);
+    console.log("[initializeCollection] Final sig slots:", phantomResult.signatures.map((s, i) =>
+      `[${i}] ${s.some(b => b !== 0) ? "SIGNED" : "empty"}`
+    ));
+    serializedTx = phantomResult.serialize();
+  } else {
+    // Phantom downgraded to legacy Transaction — use partialSign
+    console.log("[initializeCollection] Result is legacy Transaction — calling .partialSign(keypairs)");
+    const legacyTx = phantomResult as unknown as Transaction;
+    legacyTx.partialSign(collectionKeypair, nftMintKeypair);
+    console.log("[initializeCollection] Final sig slots:", legacyTx.signatures.map(s => ({
+      pubkey: s.publicKey.toString().slice(0, 8) + "…",
+      signed: s.signature !== null,
+    })));
+    serializedTx = legacyTx.serialize();
   }
 
-  console.log("[initializeCollection] Final signatures:", legacyTx.signatures.map(s => ({
-    pubkey: s.publicKey.toString().slice(0, 8) + "…",
-    signed: s.signature !== null,
-  })));
-
-  // ── Step 5: Simulate — NO second argument ────────────────────────────────
-  // web3.js legacy simulateTransaction throws "Invalid arguments" if the
-  // second arg is a plain object (it expects undefined or Array<Signer>).
-  // Calling with no second arg makes the RPC use its default sigVerify:false.
-  console.time("simulate");
-  const simResult = await getConnection().simulateTransaction(legacyTx);
-  console.timeEnd("simulate");
-  console.log("[initializeCollection] simulate:", simResult.value.err ?? "OK");
-  if (simResult.value.logs?.length) {
-    console.log("[initializeCollection] logs:\n" + simResult.value.logs.join("\n"));
-  }
-  if (simResult.value.err) {
-    throw new Error(
-      `Simulation failed: ${JSON.stringify(simResult.value.err)}\nLogs:\n${simResult.value.logs?.join("\n") ?? "(none)"}`
-    );
-  }
-
-  // ── Step 6: Send raw ─────────────────────────────────────────────────────
+  // ── Step 4: Send raw — skipPreflight avoids RPC simulation on multi-signer ─
   console.time("send-raw");
-  const sig = await getConnection().sendRawTransaction(
-    legacyTx.serialize(),
-    { skipPreflight: true }
-  );
+  const sig = await getConnection().sendRawTransaction(serializedTx, {
+    skipPreflight:        true,
+    preflightCommitment:  "confirmed",
+    maxRetries:           3,
+  });
   console.timeEnd("send-raw");
   console.log("[initializeCollection] Sent:", sig);
   console.log("[initializeCollection] Explorer: https://explorer.solana.com/tx/" + sig);
 
-  // ── Step 7: Wait for confirmation ────────────────────────────────────────
+  // ── Step 5: Wait for confirmation ────────────────────────────────────────
   console.time("confirm");
   await getConnection().confirmTransaction(
     { signature: sig, blockhash, lastValidBlockHeight },

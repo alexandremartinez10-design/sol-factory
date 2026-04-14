@@ -177,6 +177,12 @@ export async function initializeCollection(
     encodeString(metadataUri),
   ]);
 
+  console.log("=== INSTRUCTION DATA DEBUG ===");
+  console.log("metadataUri length :", metadataUri.length, "chars");
+  console.log("metadataUri prefix :", metadataUri.substring(0, 60));
+  console.log("instruction data   :", data.length, "bytes");
+  console.log("==============================");
+
   const keys: AccountMeta[] = [
     { pubkey: wallet.publicKey,              isSigner: true,  isWritable: true  },
     { pubkey: PLATFORM_WALLET,               isSigner: false, isWritable: true  },
@@ -257,8 +263,17 @@ export async function initializeCollection(
   }
 
   // ── Step 4: Send raw — skipPreflight avoids RPC simulation on multi-signer ─
+  console.log("=== SEND DEBUG ===");
+  console.log("serializedTx type  :", serializedTx.constructor?.name);
+  console.log("serializedTx bytes :", serializedTx.length);
+  console.log("base64 size (est.) :", Math.ceil(serializedTx.length / 3) * 4, "chars (limit ~1644)");
+  console.log("==================");
+
+  // Wrap in Buffer to guarantee proper base64 encoding by web3.js
+  const txBuffer = Buffer.from(serializedTx);
+
   console.time("send-raw");
-  const sig = await getConnection().sendRawTransaction(serializedTx, {
+  const sig = await getConnection().sendRawTransaction(txBuffer, {
     skipPreflight:        true,
     preflightCommitment:  "confirmed",
     maxRetries:           3,

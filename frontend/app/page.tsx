@@ -211,7 +211,7 @@ export default function HomePage() {
           className="animate-fade-up mt-5 text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed"
           style={{ animationDelay: "380ms" }}
         >
-          You set your own royalties. SolFactory takes{" "}
+          Standard 8% royalties. SolFactory takes{" "}
           <span className="text-emerald-400 font-semibold">0% commission</span>{" "}
           on sales — now and forever.
         </p>

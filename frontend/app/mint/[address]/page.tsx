@@ -6,7 +6,6 @@ import { useWallet }                                   from "@solana/wallet-adap
 import {
   Keypair,
   Transaction,
-  TransactionMessage,
   VersionedTransaction,
 }                                                       from "@solana/web3.js";
 import Link                                            from "next/link";
@@ -224,15 +223,11 @@ function MintContent({ address }: { address: string }) {
       if (!data.transaction)    throw new Error("No transaction returned");
       if (!data.nftMintSecretKey) throw new Error("No nftMintSecretKey returned");
 
-      // ── Step 1: Rebuild as VersionedTransaction — ZERO signatures ─────────
-      // Deserialize the legacy tx from the server (unsigned — no pre-sigs),
-      // decompile its message, then compile to V0. This gives Phantom a
-      // completely clean transaction (Blowfish requires Phantom to be the
-      // FIRST signer; any pre-existing keypair signature triggers the warning).
-      const legacyTx = Transaction.from(Buffer.from(data.transaction, "base64"));
-      const tmsg     = TransactionMessage.decompile(legacyTx.message);
-      const v0msg    = tmsg.compileToV0Message();
-      const vTx      = new VersionedTransaction(v0msg);
+      // ── Step 1: Deserialize VersionedTransaction — ZERO signatures ───────────
+      // The server built a clean V0 VersionedTransaction (no pre-signatures).
+      // Blowfish (Phantom's security engine) requires Phantom to be the FIRST
+      // signer — any pre-existing keypair signature triggers the warning.
+      const vTx = VersionedTransaction.deserialize(Buffer.from(data.transaction, "base64"));
 
       console.log("[mint] VersionedTransaction built. Sig slots (all must be empty):",
         vTx.signatures.map(s => s.every(b => b === 0) ? "empty" : "signed")

@@ -5,8 +5,9 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
-  Transaction,
   TransactionInstruction,
+  TransactionMessage,
+  VersionedTransaction,
   AccountMeta,
   ComputeBudgetProgram,
 } from "@solana/web3.js";
@@ -142,17 +143,22 @@ export async function POST(request: NextRequest) {
 
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
 
-    const tx = new Transaction();
-    tx.recentBlockhash = blockhash;
-    tx.feePayer        = buyer;
-    tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 250_000 }));
-    tx.add(instruction);
+    // Build a V0 VersionedTransaction — completely unsigned (zero signatures).
+    // Blowfish (Phantom's security engine) flags any transaction that already
+    // carries keypair signatures when signTransaction is called. We send a
+    // clean V0 tx so Phantom is always the FIRST signer.
+    // The client uses nftMintSecretKey to sign AFTER Phantom.
+    const message = new TransactionMessage({
+      payerKey:        buyer,
+      recentBlockhash: blockhash,
+      instructions: [
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 250_000 }),
+        instruction,
+      ],
+    }).compileToV0Message();
 
-    // Do NOT pre-sign here — Blowfish (Phantom's security engine) flags any
-    // transaction that already carries keypair signatures when signTransaction
-    // is called. We send a completely clean transaction so Phantom is always
-    // the FIRST signer. The client uses nftMintSecretKey to sign AFTER Phantom.
-    const serialized = tx.serialize({ requireAllSignatures: false });
+    const vTx      = new VersionedTransaction(message);
+    const serialized = vTx.serialize();
 
     return NextResponse.json({
       transaction:          Buffer.from(serialized).toString("base64"),

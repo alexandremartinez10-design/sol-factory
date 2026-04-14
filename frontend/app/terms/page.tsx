@@ -21,7 +21,7 @@ const SECTIONS = [
   },
   {
     title: "4. Creator Royalties",
-    body: `Creators set their own royalty percentage at the time of collection creation. Royalties are encoded in the Metaplex Core NFT metadata and apply to secondary sales on compatible marketplaces. SolFactory does not receive any portion of royalties. Enforcement of royalties on secondary marketplaces depends on each marketplace's own policy and is outside of SolFactory's control.`,
+    body: `A standard 8% royalty is automatically applied to every NFT minted through SolFactory. This is hardcoded in the smart contract and enforced at the protocol level. Royalties are encoded in the Metaplex Core NFT metadata and credited 100% to the collection creator on secondary sales on compatible marketplaces. SolFactory does not receive any portion of royalties. Enforcement of royalties on secondary marketplaces depends on each marketplace's own policy and is outside of SolFactory's control.`,
   },
   {
     title: "5. Smart Contract Ownership",

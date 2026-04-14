@@ -21,7 +21,7 @@ const HOW_IT_WORKS = [
   {
     icon: <SlidersHorizontal className="w-6 h-6 text-purple-400" />,
     title: "Configure Your Collection",
-    desc: "Set mint price, supply, and your royalty percentage. Funds go directly to your wallet.",
+    desc: "Set mint price and supply. 8% royalties are applied automatically on secondary sales. Funds go directly to your wallet.",
   },
   {
     icon: <Zap className="w-6 h-6 text-purple-400" />,

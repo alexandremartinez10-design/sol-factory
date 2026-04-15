@@ -380,10 +380,10 @@ export default function HomePage() {
         </div>
 
         <div className="marquee-mask relative">
-          <div className="marquee-track-left flex gap-4 w-max">
-            {MARQUEE_ITEMS.map((c, i) => (
+          <div className="marquee-track-right flex gap-4 w-max">
+            {[...MARQUEE_ITEMS].reverse().map((c, i) => (
               <div
-                key={`l-${i}`}
+                key={`r-${i}`}
                 className="shrink-0 w-48 h-48 rounded-2xl overflow-hidden relative
                            border border-white/10 bg-zinc-900
                            hover:border-purple-500/50 transition-colors duration-300"
@@ -403,32 +403,6 @@ export default function HomePage() {
                 <div className="absolute bottom-3 left-3 right-3">
                   <p className="text-white font-bold text-sm truncate">{c.name}</p>
                   <p className="text-zinc-400 text-[10px] mt-0.5">{c.supply} items</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="marquee-mask relative mt-4">
-          <div className="marquee-track-right flex gap-4 w-max">
-            {[...MARQUEE_ITEMS].reverse().map((c, i) => (
-              <div
-                key={`r-${i}`}
-                className="shrink-0 w-40 h-40 rounded-2xl overflow-hidden relative
-                           border border-white/10 bg-zinc-900
-                           hover:border-purple-500/50 transition-colors duration-300"
-              >
-                <img
-                  src={c.imgSrc}
-                  alt={c.imgAlt}
-                  className="w-full h-full object-cover"
-                  style={c.filter ? { filter: c.filter } : undefined}
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                <div className="absolute inset-0" style={{ background: "rgba(20,5,40,0.2)", mixBlendMode: "multiply" }} />
-                <div className="absolute bottom-2 left-2.5 right-2.5">
-                  <p className="text-white font-bold text-xs truncate">{c.name}</p>
                 </div>
               </div>
             ))}

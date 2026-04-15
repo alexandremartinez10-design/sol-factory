@@ -2,11 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══════════════════════════════════════════════════════════════════════
+   ROOT VARIABLES — Solana brand palette
+   ══════════════════════════════════════════════════════════════════════ */
 :root {
   --background: #0a0a0a;
   --foreground: #ffffff;
+
+  /* Solana brand gradient stops */
+  --sol-violet: #9945FF;
+  --sol-violet-deep: #7c3aed;
+  --sol-green: #14F195;
+  --sol-blue: #3b82f6;
+
+  /* Glass surface */
+  --glass-bg: rgba(20, 20, 26, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-border-hover: rgba(153, 69, 255, 0.35);
 }
 
+/* ── Reset ─────────────────────────────────────────── */
 * {
   box-sizing: border-box;
   padding: 0;
@@ -19,56 +34,156 @@ body {
   overflow-x: hidden;
   background: #0a0a0a;
   color: #ffffff;
+  /* Premium font smoothing */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.011em;
 }
 
-/* ── Scrollbar ────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+/* ══════════════════════════════════════════════════════════════════════
+   AMBIENT BACKGROUND — subtle radial gradients for depth
+   Fixed layer behind all content, no performance cost
+   ══════════════════════════════════════════════════════════════════════ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 45% at 15% 0%, rgba(153, 69, 255, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 40% at 85% 5%, rgba(59, 130, 246, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 10% 100%, rgba(124, 58, 237, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 90% 95%, rgba(20, 241, 149, 0.05) 0%, transparent 60%);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCROLLBAR — thin, gradient thumb
+   ══════════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 2px; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #9945FF 0%, #7c3aed 100%);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a855f7 0%, #9945FF 100%);
+}
 
 /* ── Selection ────────────────────────────────── */
-::selection { background: rgba(124, 58, 237, 0.3); color: #ffffff; }
+::selection { background: rgba(153, 69, 255, 0.35); color: #ffffff; }
 
-/* ── Gradient text utility ────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   GRADIENT TEXT UTILITY
+   ══════════════════════════════════════════════════════════════════════ */
 .gradient-text {
-  background: linear-gradient(135deg, #a78bfa, #c084fc);
+  background: linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ── Gradient button ──────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   PRIMARY BUTTON — Electric Solana gradient
+   Violet → deep violet → green subtle tail, shifts on hover + glow
+   ══════════════════════════════════════════════════════════════════════ */
 .btn-primary {
-  @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white rounded-xl transition-all duration-200 overflow-hidden;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white rounded-xl overflow-hidden;
+  background: linear-gradient(120deg, #9945FF 0%, #7c3aed 45%, #a855f7 75%, #14F195 140%);
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  transition: background-position 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.3s ease;
+  box-shadow:
+    0 4px 16px rgba(124, 58, 237, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
 }
-.btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+.btn-primary:hover {
+  background-position: 70% 0%;
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 24px rgba(153, 69, 255, 0.45),
+    0 0 40px rgba(153, 69, 255, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
 .btn-primary:active { transform: translateY(0); }
-.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
-/* ── Ghost button ─────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   GHOST BUTTON — Glass surface, purple border on hover
+   ══════════════════════════════════════════════════════════════════════ */
 .btn-ghost {
-  @apply inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white rounded-xl border border-zinc-700 bg-zinc-900/50 transition-all duration-200;
+  @apply inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white rounded-xl;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.btn-ghost:hover { @apply border-purple-500 bg-zinc-800/60; }
-.btn-ghost:disabled { @apply opacity-40 cursor-not-allowed; }
+.btn-ghost:hover {
+  background: rgba(153, 69, 255, 0.08);
+  border-color: rgba(153, 69, 255, 0.45);
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(153, 69, 255, 0.15);
+}
+.btn-ghost:active { transform: translateY(0); }
+.btn-ghost:disabled { @apply opacity-40 cursor-not-allowed; transform: none; box-shadow: none; }
 
-/* ── Card ─────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   CARD — Premium glassmorphism
+   Translucent + blur + saturate for Apple-like frosted glass
+   ══════════════════════════════════════════════════════════════════════ */
 .card {
-  @apply rounded-2xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm;
+  border-radius: 1rem;
+  background: rgba(20, 20, 26, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  transition: border-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* ── Input ────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   INPUT — Glass input with purple focus glow
+   ══════════════════════════════════════════════════════════════════════ */
 .input {
-  @apply w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/40 transition-colors text-sm;
+  @apply w-full rounded-xl px-4 py-3 text-white text-sm;
+  background: rgba(20, 20, 26, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.input::placeholder { color: rgba(161, 161, 170, 0.6); }
+.input:focus {
+  outline: none;
+  border-color: rgba(153, 69, 255, 0.55);
+  background: rgba(20, 20, 26, 0.8);
+  box-shadow:
+    0 0 0 3px rgba(153, 69, 255, 0.15),
+    0 0 24px rgba(153, 69, 255, 0.12);
+}
+.input:hover:not(:focus) {
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
-/* ── Subtle glow on focused card ─────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   PURPLE GLOW — soft ambient glow utility
+   ══════════════════════════════════════════════════════════════════════ */
 .glow-purple {
-  box-shadow: 0 0 40px rgba(124, 58, 237, 0.12), 0 0 80px rgba(168, 85, 247, 0.06);
+  box-shadow:
+    0 0 40px rgba(153, 69, 255, 0.14),
+    0 0 80px rgba(168, 85, 247, 0.06);
 }
 
-/* ── Fade-in animations ───────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   FADE ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════ */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0);    }
@@ -80,9 +195,9 @@ body {
 }
 
 .animate-fade-up {
-  animation: fadeInUp 0.65s ease-out both;
+  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.65s ease-out both;
+  animation: fadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

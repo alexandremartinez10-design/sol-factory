@@ -81,52 +81,52 @@ const ROYALTY_POINTS = [
 
 const FEATURED = [
   {
-    name: "Cosmic Apes",
-    symbol: "CAPE",
-    supply: "1,000",
-    // TODO: Remplacer par une vraie image NFT premium — style generative PFP dark
-    imgSrc: "https://picsum.photos/seed/cosmic-dark-ape-glitch/600/600",
-    imgAlt: "Cosmic Apes NFT — generative ape collection on Solana",
-  },
-  {
-    name: "Neon Dreams",
-    symbol: "NDRM",
+    name: "Lunar Eclipse",
+    symbol: "LUNA",
     supply: "500",
-    // TODO: Remplacer par une vraie image NFT premium — style cyberpunk neon city
-    imgSrc: "https://picsum.photos/seed/neon-purple-cyberpunk/600/600",
-    imgAlt: "Neon Dreams NFT — cyberpunk generative art collection",
+    // TODO: Remplacer par l'image "Lunar Eclipse Festival" (badge VIP holographique violet/teal)
+    imgSrc: "https://picsum.photos/seed/lunar-eclipse-vip-badge/600/600",
+    imgAlt: "Lunar Eclipse NFT — holographic VIP festival badge collection on Solana",
   },
   {
-    name: "Shadow Legion",
-    symbol: "SLEG",
-    supply: "2,000",
-    // TODO: Remplacer par une vraie image NFT premium — style dark fantasy warrior
-    imgSrc: "https://picsum.photos/seed/shadow-dark-warrior/600/600",
-    imgAlt: "Shadow Legion NFT — dark fantasy warrior collection",
+    name: "Arcane Circle",
+    symbol: "ARCN",
+    supply: "200",
+    // TODO: Remplacer par l'image "Arcane Circle — Founding Member" (clé néon sur fond sombre)
+    imgSrc: "https://picsum.photos/seed/arcane-circle-neon-key/600/600",
+    imgAlt: "Arcane Circle NFT — founding member key collection on Solana",
   },
   {
-    name: "Pixel Punks",
-    symbol: "PPNK",
-    supply: "888",
-    // TODO: Remplacer par une vraie image NFT premium — style pixel art rétro
-    imgSrc: "https://picsum.photos/seed/pixel-glitch-punk-dark/600/600",
-    imgAlt: "Pixel Punks NFT — retro pixel art collection on Solana",
+    name: "Crystal Spirit",
+    symbol: "CRYS",
+    supply: "300",
+    // TODO: Remplacer par l'image "Crystal Spirit" (renard cristal violet sur fond étoilé)
+    imgSrc: "https://picsum.photos/seed/crystal-spirit-fox-violet/600/600",
+    imgAlt: "Crystal Spirit NFT — crystal fox spirit collection on Solana",
+  },
+  {
+    name: "Neon Phantom",
+    symbol: "NPHM",
+    supply: "500",
+    // TODO: Remplacer par l'image "Neon Phantom" (silhouette femme néon violet/cyan)
+    imgSrc: "https://picsum.photos/seed/neon-phantom-silhouette/600/600",
+    imgAlt: "Neon Phantom NFT — cyberpunk neon silhouette collection on Solana",
   },
   {
     name: "Aurora Wolves",
     symbol: "AWLF",
-    supply: "777",
-    // TODO: Remplacer par une vraie image NFT premium — style nature mystique aurora
-    imgSrc: "https://picsum.photos/seed/aurora-mystical-wolf/600/600",
-    imgAlt: "Aurora Wolves NFT — nature-inspired generative collection",
+    supply: "200",
+    // TODO: Remplacer par l'image "Aurora Wolves" (loups éthérés sous aurore boréale)
+    imgSrc: "https://picsum.photos/seed/aurora-wolves-borealis/600/600",
+    imgAlt: "Aurora Wolves NFT — ethereal wolves aurora borealis collection on Solana",
   },
   {
-    name: "Void Walkers",
-    symbol: "VOID",
-    supply: "333",
-    // TODO: Remplacer par une vraie image NFT premium — style abstract sci-fi void
-    imgSrc: "https://picsum.photos/seed/void-cosmos-abstract/600/600",
-    imgAlt: "Void Walkers NFT — abstract sci-fi collection on Solana",
+    name: "Legendary Skin Pass",
+    symbol: "LGND",
+    supply: "100",
+    // TODO: Remplacer par l'image "Legendary Skin Pass" (guerrier cyberpunk épée néon)
+    imgSrc: "https://picsum.photos/seed/legendary-skin-pass-sword/600/600",
+    imgAlt: "Legendary Skin Pass NFT — exclusive cyberpunk warrior skin collection on Solana",
   },
 ];
 

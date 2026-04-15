@@ -1,3 +1,5 @@
+// app/page.tsx — SolFactory homepage (redesign premium v2)
+
 import Link from "next/link";
 import {
   Wallet, Upload, SlidersHorizontal, Zap, Star,
@@ -9,22 +11,22 @@ import {
 
 const HOW_IT_WORKS = [
   {
-    icon: <Wallet className="w-6 h-6 text-purple-400" />,
+    icon: <Wallet className="w-5 h-5 text-purple-300" />,
     title: "Connect Your Wallet",
     desc: "Connect Phantom or Solflare. No email needed.",
   },
   {
-    icon: <Upload className="w-6 h-6 text-purple-400" />,
+    icon: <Upload className="w-5 h-5 text-purple-300" />,
     title: "Upload Your Artwork",
     desc: "Drag & drop PNG, JPG or GIF. We handle IPFS automatically.",
   },
   {
-    icon: <SlidersHorizontal className="w-6 h-6 text-purple-400" />,
+    icon: <SlidersHorizontal className="w-5 h-5 text-purple-300" />,
     title: "Configure Your Collection",
     desc: "Set mint price and supply. 8% royalties are applied automatically on secondary sales. Funds go directly to your wallet.",
   },
   {
-    icon: <Zap className="w-6 h-6 text-purple-400" />,
+    icon: <Zap className="w-5 h-5 text-purple-300" />,
     title: "Go Live in One Click",
     desc: "Deploy on Solana Mainnet. Get your mint link instantly.",
   },
@@ -34,32 +36,32 @@ const HOW_IT_WORKS = [
 
 const FEATURES = [
   {
-    icon: <DollarSign className="w-6 h-6 text-purple-400" />,
+    icon: <DollarSign className="w-5 h-5 text-purple-300" />,
     title: "Ultra Low Cost",
     desc: "Only 0.15 SOL one-time fee. No subscriptions, no hidden costs.",
   },
   {
-    icon: <TrendingUp className="w-6 h-6 text-purple-400" />,
+    icon: <TrendingUp className="w-5 h-5 text-purple-300" />,
     title: "Zero Commission",
     desc: "Keep 100% of your mint sales and royalties. We take nothing.",
   },
   {
-    icon: <Lock className="w-6 h-6 text-purple-400" />,
+    icon: <Lock className="w-5 h-5 text-purple-300" />,
     title: "Full Ownership",
     desc: "The smart contract is 100% yours. Fully verifiable on Solana Explorer.",
   },
   {
-    icon: <Cloud className="w-6 h-6 text-purple-400" />,
+    icon: <Cloud className="w-5 h-5 text-purple-300" />,
     title: "Automatic IPFS",
     desc: "We handle all technical parts — images, JSON files, and pinning.",
   },
   {
-    icon: <Shield className="w-6 h-6 text-purple-400" />,
+    icon: <Shield className="w-5 h-5 text-purple-300" />,
     title: "Mainnet Ready",
     desc: "Launch directly on Solana Mainnet. No Devnet stress.",
   },
   {
-    icon: <Rocket className="w-6 h-6 text-purple-400" />,
+    icon: <Rocket className="w-5 h-5 text-purple-300" />,
     title: "Early Creator Boost",
     desc: "First creators get featured on the homepage for maximum visibility.",
   },
@@ -74,49 +76,56 @@ const ROYALTY_POINTS = [
 ];
 
 // ── Featured collections (marketing examples — not real user collections) ─────
-// TODO: replace imgSrc values with real curated IPFS artwork when available
+// TODO: Remplacer chaque imgSrc par l'URL IPFS d'une vraie image NFT premium
+// Style recommandé : dark cyberpunk, generative art, abstract, PFP, futuristic
 
 const FEATURED = [
   {
     name: "Cosmic Apes",
     symbol: "CAPE",
     supply: "1,000",
-    imgSrc: "https://picsum.photos/seed/cosmicapes/600/600",
+    // TODO: Remplacer par une vraie image NFT premium — style generative PFP dark
+    imgSrc: "https://picsum.photos/seed/cosmic-dark-ape-glitch/600/600",
     imgAlt: "Cosmic Apes NFT — generative ape collection on Solana",
   },
   {
     name: "Neon Dreams",
     symbol: "NDRM",
     supply: "500",
-    imgSrc: "https://picsum.photos/seed/neondreams/600/600",
+    // TODO: Remplacer par une vraie image NFT premium — style cyberpunk neon city
+    imgSrc: "https://picsum.photos/seed/neon-purple-cyberpunk/600/600",
     imgAlt: "Neon Dreams NFT — cyberpunk generative art collection",
   },
   {
     name: "Shadow Legion",
     symbol: "SLEG",
     supply: "2,000",
-    imgSrc: "https://picsum.photos/seed/shadowlegion/600/600",
+    // TODO: Remplacer par une vraie image NFT premium — style dark fantasy warrior
+    imgSrc: "https://picsum.photos/seed/shadow-dark-warrior/600/600",
     imgAlt: "Shadow Legion NFT — dark fantasy warrior collection",
   },
   {
     name: "Pixel Punks",
     symbol: "PPNK",
     supply: "888",
-    imgSrc: "https://picsum.photos/seed/pixelpunks/600/600",
+    // TODO: Remplacer par une vraie image NFT premium — style pixel art rétro
+    imgSrc: "https://picsum.photos/seed/pixel-glitch-punk-dark/600/600",
     imgAlt: "Pixel Punks NFT — retro pixel art collection on Solana",
   },
   {
     name: "Aurora Wolves",
     symbol: "AWLF",
     supply: "777",
-    imgSrc: "https://picsum.photos/seed/aurorawolves/600/600",
+    // TODO: Remplacer par une vraie image NFT premium — style nature mystique aurora
+    imgSrc: "https://picsum.photos/seed/aurora-mystical-wolf/600/600",
     imgAlt: "Aurora Wolves NFT — nature-inspired generative collection",
   },
   {
     name: "Void Walkers",
     symbol: "VOID",
     supply: "333",
-    imgSrc: "https://picsum.photos/seed/voidwalkers/600/600",
+    // TODO: Remplacer par une vraie image NFT premium — style abstract sci-fi void
+    imgSrc: "https://picsum.photos/seed/void-cosmos-abstract/600/600",
     imgAlt: "Void Walkers NFT — abstract sci-fi collection on Solana",
   },
 ];
@@ -126,36 +135,71 @@ const FEATURED = [
 export default function HomePage() {
   return (
     <>
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-24 pb-36 overflow-hidden">
-        {/* Background glow */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          HERO — gradient multicouche pour plus de profondeur et d'impact
+      ══════════════════════════════════════════════════════════════════════ */}
+      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-28 pb-40 overflow-hidden">
+
+        {/* Glow principal — violet large */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10"
           style={{
             background:
-              "radial-gradient(ellipse 90% 55% at 50% -5%, rgba(124,58,237,0.22) 0%, transparent 68%)",
+              "radial-gradient(ellipse 100% 60% at 50% -10%, rgba(124,58,237,0.30) 0%, transparent 65%)",
+          }}
+        />
+        {/* Glow secondaire — rose/violet plus chaud pour plus de relief */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(ellipse 55% 40% at 50% 0%, rgba(168,85,247,0.18) 0%, transparent 55%)",
+          }}
+        />
+        {/* Vignette basse pour fondre le contenu dans le fond */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-40 -z-10"
+          style={{
+            background: "linear-gradient(to top, #0a0a0a 0%, transparent 100%)",
           }}
         />
 
-        {/* Badge */}
+        {/* Badge "early access" */}
         <div
-          className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-sm font-medium animate-fade-up"
+          className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full
+                     border border-purple-500/35 bg-purple-500/12 text-purple-300
+                     text-sm font-medium animate-fade-up
+                     shadow-[0_0_20px_rgba(124,58,237,0.12)]"
           style={{ animationDelay: "0ms" }}
         >
           <Star className="w-3.5 h-3.5 fill-current" />
           Early access — be one of the first creators
         </div>
 
-        {/* H1 */}
+        {/* H1 — plus grand, tracking plus serré, gradient amélioré */}
         <h1
-          className="animate-fade-up text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-[1.06] max-w-4xl mx-auto tracking-tight"
+          className="animate-fade-up text-5xl sm:text-6xl md:text-7xl lg:text-8xl
+                     font-extrabold text-white leading-[1.04] max-w-4xl mx-auto tracking-tight"
           style={{ animationDelay: "80ms" }}
         >
           Launch Your Solana NFT
           <br />
           Collection in{" "}
-          <span className="gradient-text">60 Seconds</span>
+          {/* Gradient plus vibrant : violet → rose clair */}
+          <span
+            className="gradient-text"
+            style={{
+              background: "linear-gradient(135deg, #c084fc 0%, #a78bfa 40%, #818cf8 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            60 Seconds
+          </span>
         </h1>
 
         {/* Subtitle */}
@@ -167,7 +211,7 @@ export default function HomePage() {
           upload your art, and go live on Mainnet instantly.
         </p>
 
-        {/* Inline trust badges */}
+        {/* Trust badges inline */}
         <div
           className="animate-fade-up mt-8 flex flex-wrap items-center justify-center gap-3"
           style={{ animationDelay: "240ms" }}
@@ -179,7 +223,9 @@ export default function HomePage() {
           ].map((label) => (
             <span
               key={label}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/8 text-emerald-300 text-xs font-semibold"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full
+                         border border-emerald-500/30 bg-emerald-500/8 text-emerald-300
+                         text-xs font-semibold"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
               {label}
@@ -194,13 +240,13 @@ export default function HomePage() {
         >
           <Link
             href="/create"
-            className="btn-primary text-base px-9 py-4 shadow-lg shadow-purple-900/30"
+            className="btn-primary text-base px-10 py-4 shadow-xl shadow-purple-900/35"
           >
             Launch My Collection Now
           </Link>
           <Link
             href="/create?devnet=true"
-            className="btn-ghost text-base px-9 py-4"
+            className="btn-ghost text-base px-10 py-4"
           >
             Try Devnet for Free
           </Link>
@@ -228,15 +274,20 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* ── Featured Collections ─────────────────────────────────────────── */}
-      <section className="py-20 px-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          FEATURED COLLECTIONS — section la plus impactante visuellement
+          Cartes premium : hover glow violet, zoom image, badges glass
+      ══════════════════════════════════════════════════════════════════════ */}
+      <section className="py-24 px-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
         <div className="mx-auto max-w-6xl">
-          {/* Section header */}
-          <div className="text-center mb-12 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">
+
+          {/* Section header amélioré */}
+          <div className="text-center mb-14 space-y-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-purple-400">
               Built with SolFactory
             </p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               Collections on SolFactory
             </h2>
             <p className="text-zinc-500 text-sm max-w-sm mx-auto">
@@ -244,118 +295,229 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Grid: 2 col mobile → 3 col md → 3 col lg */}
+          {/* Grid cartes */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
-            {FEATURED.map((c) => (
-              /* Non-clickable display card */
+            {FEATURED.map((c, i) => (
+              // Carte non-cliquable — cursor-default
+              // Délai de fade-up progressif pour un rendu en cascade élégant
               <div
                 key={c.name}
-                className="card overflow-hidden group hover:border-purple-500/40 hover:-translate-y-1.5 transition-all duration-300 cursor-default"
+                className="animate-fade-up"
+                style={{ animationDelay: `${i * 60}ms` }}
               >
-                {/* NFT image — 1:1 aspect ratio */}
-                {/* TODO: remplacer imgSrc par l'URL IPFS réelle de la collection */}
-                <div className="relative w-full aspect-square overflow-hidden bg-zinc-900">
-                  <img
-                    src={c.imgSrc}
-                    alt={c.imgAlt}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
+                <div
+                  className="
+                    relative overflow-hidden rounded-2xl
+                    border border-zinc-800/90 bg-zinc-950
+                    group cursor-default
+                    transition-all duration-500 ease-out
+                    hover:-translate-y-2.5
+                    hover:border-purple-500/55
+                    hover:shadow-2xl hover:shadow-purple-900/35
+                  "
+                >
+                  {/* ── Image NFT ─────────────────────────────────────────── */}
+                  {/* TODO: Remplacer imgSrc par l'URL IPFS d'une vraie image NFT */}
+                  <div className="relative w-full aspect-square overflow-hidden bg-zinc-900">
+                    <img
+                      src={c.imgSrc}
+                      alt={c.imgAlt}
+                      // Zoom + légère surexposition au hover pour effet premium
+                      className="w-full h-full object-cover
+                                 transition-all duration-700 ease-out
+                                 group-hover:scale-110 group-hover:brightness-110"
+                      loading="lazy"
+                    />
 
-                  {/* Bottom gradient overlay */}
+                    {/* Color-grade overlay — assombrit et violet-ise les images
+                        → n'importe quelle photo ressemble plus à du dark NFT art */}
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: "rgba(20, 5, 40, 0.28)",
+                        mixBlendMode: "multiply",
+                      }}
+                    />
+
+                    {/* Gradient de lecture en bas — fort pour le nom */}
+                    <div
+                      aria-hidden
+                      className="absolute inset-x-0 bottom-0 h-3/5 pointer-events-none"
+                      style={{
+                        background:
+                          "linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.55) 45%, transparent 100%)",
+                      }}
+                    />
+
+                    {/* Glow violet depuis le haut au hover — effet "spotlight" */}
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 pointer-events-none
+                                 opacity-0 group-hover:opacity-100
+                                 transition-opacity duration-500"
+                      style={{
+                        background:
+                          "radial-gradient(ellipse 90% 70% at 50% -10%, rgba(139,92,246,0.22) 0%, transparent 65%)",
+                      }}
+                    />
+
+                    {/* Badge SYMBOL — verre dépoli top-right */}
+                    <div
+                      className="absolute top-3 right-3
+                                 px-2.5 py-1 rounded-lg
+                                 bg-black/55 backdrop-blur-md
+                                 border border-white/12
+                                 text-white text-[10px] font-bold tracking-widest uppercase
+                                 shadow-sm"
+                    >
+                      {c.symbol}
+                    </div>
+
+                    {/* Badge SUPPLY — violet accent top-left */}
+                    <div
+                      className="absolute top-3 left-3
+                                 px-2.5 py-1 rounded-lg
+                                 bg-violet-700/75 backdrop-blur-md
+                                 border border-violet-400/25
+                                 text-white text-[10px] font-semibold
+                                 shadow-sm shadow-violet-900/30"
+                    >
+                      {c.supply} items
+                    </div>
+
+                    {/* Nom collection — overlay bas, typo premium */}
+                    <div className="absolute bottom-0 inset-x-0 px-3.5 pb-3.5 pt-8">
+                      <p
+                        className="font-extrabold text-white text-sm leading-tight
+                                   tracking-tight truncate
+                                   drop-shadow-[0_1px_8px_rgba(0,0,0,0.8)]"
+                      >
+                        {c.name}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* ── Footer carte — badge "Minted on SolFactory" ────────── */}
+                  {/* Design premium : dot pulsant + icône vérification */}
                   <div
-                    aria-hidden
-                    className="absolute inset-x-0 bottom-0 h-2/5 pointer-events-none"
-                    style={{
-                      background:
-                        "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)",
-                    }}
-                  />
-
-                  {/* Symbol tag top-right */}
-                  <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold tracking-wide">
-                    {c.symbol}
+                    className="px-3.5 py-3 flex items-center justify-between
+                               border-t border-zinc-800/70 bg-zinc-950"
+                  >
+                    <div className="flex items-center gap-2">
+                      {/* Dot violet animé — indique "live / verified" */}
+                      <span className="relative flex h-1.5 w-1.5 shrink-0">
+                        <span
+                          className="animate-ping absolute inline-flex h-full w-full
+                                     rounded-full bg-purple-400 opacity-60"
+                        />
+                        <span
+                          className="relative inline-flex rounded-full h-1.5 w-1.5
+                                     bg-purple-500"
+                        />
+                      </span>
+                      <p className="text-[10px] text-zinc-500 font-semibold tracking-widest uppercase">
+                        Minted on SolFactory
+                      </p>
+                    </div>
+                    {/* Icône vérification — renforce le côté premium/officiel */}
+                    <CheckCircle2 className="w-3.5 h-3.5 text-purple-500/50 shrink-0" />
                   </div>
-
-                  {/* Supply badge top-left */}
-                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-purple-600/70 backdrop-blur-sm text-white text-[10px] font-semibold">
-                    {c.supply} items
-                  </div>
-
-                  {/* Name overlay bottom */}
-                  <div className="absolute bottom-0 inset-x-0 px-3 py-2.5">
-                    <p className="font-bold text-white text-sm leading-tight truncate">
-                      {c.name}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Card footer */}
-                <div className="px-3 py-3 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
-                  <p className="text-[11px] text-zinc-500 font-medium truncate">
-                    Minted on SolFactory
-                  </p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* CTA below grid */}
-          <p className="text-center mt-10 text-sm text-zinc-500">
+          {/* CTA sous la grille */}
+          <p className="text-center mt-12 text-sm text-zinc-500">
             Your collection could be here.{" "}
-            <Link href="/create" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
+            <Link
+              href="/create"
+              className="text-purple-400 hover:text-purple-300 font-semibold
+                         transition-colors underline-offset-2 hover:underline"
+            >
               Launch yours →
             </Link>
           </p>
         </div>
       </section>
 
-      {/* ── Value Banner ─────────────────────────────────────────────────── */}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          VALUE BANNER — gradient violet amélioré, texte plus impactant
+      ══════════════════════════════════════════════════════════════════════ */}
       <div
-        className="relative w-full py-8 overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
+        className="relative w-full py-9 overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #a855f7 100%)",
+        }}
       >
+        {/* Reflet brillant centré */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 60% 200% at 50% 50%, rgba(255,255,255,0.10) 0%, transparent 70%)",
+              "radial-gradient(ellipse 55% 200% at 50% 50%, rgba(255,255,255,0.12) 0%, transparent 65%)",
           }}
         />
         <p
           className="relative text-center text-white font-bold text-xl sm:text-2xl px-6 tracking-tight"
-          style={{ textShadow: "0 2px 20px rgba(124,58,237,0.5)" }}
+          style={{ textShadow: "0 2px 24px rgba(109,40,217,0.6)" }}
         >
           🔒 Pay 0.15 SOL once. Keep 100% of your royalties. Forever.
         </p>
       </div>
 
-      {/* ── How it works ─────────────────────────────────────────────────── */}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          HOW IT WORKS — numéros de step plus premium, hover avec left-border glow
+      ══════════════════════════════════════════════════════════════════════ */}
       <section className="py-28 px-4">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               How it works
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {HOW_IT_WORKS.map((step, i) => (
               <div
                 key={i}
-                className="card p-8 text-center space-y-4 hover:border-purple-500/40 hover:-translate-y-1.5 transition-all duration-300"
+                className="
+                  card p-7 text-left space-y-4
+                  hover:border-purple-500/45 hover:-translate-y-1.5
+                  hover:shadow-lg hover:shadow-purple-900/20
+                  transition-all duration-300
+                  group
+                "
               >
-                <div className="relative inline-flex mx-auto">
-                  <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                {/* Step indicator : numéro + icône */}
+                <div className="flex items-center gap-3">
+                  {/* Icône dans un carré avec fond gradient subtil */}
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0
+                               bg-purple-500/12 border border-purple-500/20
+                               group-hover:bg-purple-500/20 group-hover:border-purple-500/40
+                               transition-all duration-300"
+                  >
                     {step.icon}
                   </div>
-                  <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] font-bold flex items-center justify-center">
+                  {/* Numéro de step — badge rounded avec gradient */}
+                  <span
+                    className="w-6 h-6 rounded-full text-[11px] font-extrabold
+                               flex items-center justify-center shrink-0 text-white"
+                    style={{
+                      background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+                      boxShadow: "0 0 10px rgba(124,58,237,0.4)",
+                    }}
+                  >
                     {i + 1}
                   </span>
                 </div>
-                <h3 className="font-bold text-white text-base">{step.title}</h3>
+
+                <h3 className="font-bold text-white text-sm">{step.title}</h3>
                 <p className="text-zinc-400 text-sm leading-relaxed">{step.desc}</p>
               </div>
             ))}
@@ -367,11 +529,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Why SolFactory ───────────────────────────────────────────────── */}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          WHY SOLFACTORY — icônes avec glow au hover, gradient top-border subtil
+      ══════════════════════════════════════════════════════════════════════ */}
       <section className="py-28 px-4">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16 space-y-3">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               Why Creators Choose SolFactory
             </h2>
             <p className="text-zinc-400 text-base max-w-xl mx-auto">
@@ -379,22 +544,44 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURES.map((f, i) => (
               <div
                 key={i}
-                className="card p-7 space-y-4 hover:border-purple-500/40 hover:-translate-y-1.5 transition-all duration-300 group"
+                className="
+                  card p-7 space-y-4 group
+                  hover:border-purple-500/45 hover:-translate-y-1.5
+                  hover:shadow-lg hover:shadow-purple-900/20
+                  transition-all duration-300
+                  relative overflow-hidden
+                "
               >
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors duration-300">
+                {/* Ligne de surbrillance top au hover — effet "glow border" */}
+                <div
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-px
+                             bg-gradient-to-r from-transparent via-purple-500/60 to-transparent
+                             opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                />
+
+                {/* Icône — fond s'illumine au hover */}
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center
+                             bg-purple-500/12 border border-purple-500/20
+                             group-hover:bg-purple-500/22 group-hover:border-purple-500/45
+                             group-hover:shadow-[0_0_16px_rgba(124,58,237,0.25)]
+                             transition-all duration-300"
+                >
                   {f.icon}
                 </div>
-                <h3 className="font-bold text-white text-base">{f.title}</h3>
+
+                <h3 className="font-bold text-white text-sm">{f.title}</h3>
                 <p className="text-zinc-400 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-10 rounded-2xl border border-zinc-700 bg-zinc-900/60 px-6 py-5 max-w-lg mx-auto text-center">
+          <div className="mt-10 rounded-2xl border border-zinc-700/60 bg-zinc-900/50 px-7 py-5 max-w-lg mx-auto text-center">
             <p className="text-sm text-zinc-400 leading-relaxed">
               <span className="text-zinc-200 font-semibold">
                 This isn&apos;t a promise. It&apos;s written in the smart contract.
@@ -405,12 +592,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Royalties breakdown ───────────────────────────────────────────── */}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          ROYALTIES — exemple en box emerald bien mis en valeur,
+          points de liste avec glow subtil sur les icônes
+      ══════════════════════════════════════════════════════════════════════ */}
       <section className="py-20 px-4">
         <div className="mx-auto max-w-3xl">
-          <div className="card p-8 sm:p-10 space-y-6 border-purple-500/20">
+          <div
+            className="card p-8 sm:p-10 space-y-7"
+            style={{
+              borderColor: "rgba(124,58,237,0.28)",
+              boxShadow: "0 0 48px rgba(124,58,237,0.08), inset 0 0 40px rgba(124,58,237,0.03)",
+            }}
+          >
+            {/* Header section */}
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-purple-400">
                 Your Royalties
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold text-white">
@@ -422,31 +620,51 @@ export default function HomePage() {
               </p>
             </div>
 
-            <ul className="space-y-3">
+            {/* Points liste — icônes CheckCircle avec glow */}
+            <ul className="space-y-3.5">
               {ROYALTY_POINTS.map((point) => (
                 <li key={point} className="flex items-start gap-3 text-sm text-zinc-300">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  {/* Icône avec halo vert subtil */}
+                  <div className="shrink-0 mt-0.5 rounded-full p-0.5
+                                  shadow-[0_0_8px_rgba(52,211,153,0.35)]">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  </div>
                   {point}
                 </li>
               ))}
             </ul>
 
-            <div className="pt-2 border-t border-zinc-800">
-              <p className="text-xs text-zinc-500 leading-relaxed">
-                Example: with 8% royalties and 1,000 secondary sales at 1 SOL each →{" "}
-                <span className="text-emerald-400 font-semibold">80 SOL earned passively</span>.
-                SolFactory receives 0 SOL.
+            {/* Exemple chiffré — box emerald mise en valeur */}
+            <div
+              className="rounded-xl border border-emerald-500/25 bg-emerald-500/6 px-5 py-4"
+              style={{ boxShadow: "0 0 24px rgba(52,211,153,0.06)" }}
+            >
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                <span className="text-zinc-200 font-semibold block mb-1 text-sm">
+                  Example calculation
+                </span>
+                With 8% royalties and 1,000 secondary sales at 1 SOL each →{" "}
+                <span className="text-emerald-400 font-bold text-sm">
+                  80 SOL earned passively
+                </span>
+                . SolFactory receives 0 SOL.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Social proof / Transparency note ─────────────────────────────── */}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          NOTE DE L'ÉQUIPE — inchangé visuellement, légèrement renforcé
+      ══════════════════════════════════════════════════════════════════════ */}
       <section className="py-16 px-4">
         <div className="mx-auto max-w-2xl">
-          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 px-8 py-8 text-center space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-purple-400">
+          <div
+            className="rounded-2xl border border-purple-500/22 bg-purple-500/5
+                       px-8 py-8 text-center space-y-3"
+          >
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-purple-400">
               A note from the team
             </p>
             <p className="text-zinc-200 text-base leading-relaxed">
@@ -459,24 +677,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CTA Banner ────────────────────────────────────────────────────── */}
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          CTA BANNER FINAL — glow plus fort, typographie plus impactante
+      ══════════════════════════════════════════════════════════════════════ */}
       <section className="py-28 px-4">
         <div className="mx-auto max-w-3xl">
-          <div className="card p-10 sm:p-16 text-center glow-purple space-y-6">
+          <div
+            className="card p-10 sm:p-16 text-center space-y-6"
+            style={{
+              boxShadow:
+                "0 0 60px rgba(124,58,237,0.15), 0 0 120px rgba(168,85,247,0.07), inset 0 0 60px rgba(124,58,237,0.04)",
+              borderColor: "rgba(124,58,237,0.30)",
+            }}
+          >
             <p className="text-4xl">🌟</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight tracking-tight">
               Early creators get featured
               <br />
               on the homepage
             </h2>
-            <p className="text-zinc-400 max-w-md mx-auto">
+            <p className="text-zinc-400 max-w-md mx-auto leading-relaxed">
               Launch now while spots are still open. Featured collections get{" "}
               <span className="text-purple-300 font-semibold">10× more visibility</span>.
             </p>
             <div className="flex flex-col items-center gap-3">
               <Link
                 href="/create"
-                className="btn-primary text-base px-10 py-4 inline-flex shadow-lg shadow-purple-900/30"
+                className="btn-primary text-base px-10 py-4 inline-flex
+                           shadow-xl shadow-purple-900/35"
               >
                 Claim my spot — 0.15 SOL
               </Link>

@@ -86,8 +86,30 @@ const FEATURED = [
   { name: "Legendary Skin Pass", symbol: "LGND", supply: "100", imgSrc: "/legendary-skin-pass.png.jpg", imgAlt: "Legendary Skin Pass NFT" },
 ];
 
-// Double for marquee (infinite loop)
-const MARQUEE_ITEMS = [...FEATURED, ...FEATURED];
+// ── Marquee extended set ──────────────────────────────────────────────────────
+// We add 6 "variant" collections based on the same 6 images but with CSS
+// hue-rotate + saturate filters applied. Different names, different look —
+// gives the perception of 12 unique collections on the marquee without
+// requiring new NFT image assets. Replace with real images later.
+type MarqueeItem = {
+  name: string;
+  symbol: string;
+  supply: string;
+  imgSrc: string;
+  imgAlt: string;
+  filter?: string;
+};
+const MARQUEE_EXTRA: MarqueeItem[] = [
+  { name: "Mystic Realms",   symbol: "MYST", supply: "250", imgSrc: "/lunar-eclipse.png.jpg",      imgAlt: "Mystic Realms",   filter: "hue-rotate(80deg) saturate(1.3)" },
+  { name: "Void Runners",    symbol: "VOID", supply: "400", imgSrc: "/arcane-circle.png.jpg",      imgAlt: "Void Runners",    filter: "hue-rotate(180deg) saturate(1.2)" },
+  { name: "Ember Ascend",    symbol: "EMBR", supply: "150", imgSrc: "/crystal-spirit.png.jpg",     imgAlt: "Ember Ascend",    filter: "hue-rotate(-40deg) saturate(1.4) brightness(1.05)" },
+  { name: "Cyber Nomads",    symbol: "CYBR", supply: "333", imgSrc: "/neon-phantom.png.jpg",       imgAlt: "Cyber Nomads",    filter: "hue-rotate(120deg) saturate(1.3)" },
+  { name: "Frost Covenant",  symbol: "FRST", supply: "220", imgSrc: "/aurora-wolves.png.jpg",      imgAlt: "Frost Covenant",  filter: "hue-rotate(-60deg) saturate(0.9) brightness(1.1)" },
+  { name: "Obsidian Cult",   symbol: "OBSD", supply: "180", imgSrc: "/legendary-skin-pass.png.jpg", imgAlt: "Obsidian Cult",   filter: "hue-rotate(220deg) saturate(1.2)" },
+];
+
+// Combine then duplicate for infinite scroll. 12 unique looks × 2 = 24 tiles.
+const MARQUEE_ITEMS: MarqueeItem[] = [...FEATURED, ...MARQUEE_EXTRA, ...FEATURED, ...MARQUEE_EXTRA];
 
 // ── Comparison data ───────────────────────────────────────────────────────────
 
@@ -312,7 +334,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Floating mint receipt */}
+            {/* Floating "100% to creator" chip (bottom-left) */}
             <div
               className="absolute bottom-6 -left-4 px-4 py-3 rounded-xl
                          bg-black/70 backdrop-blur-xl border border-white/10
@@ -324,8 +346,8 @@ export default function HomePage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">Mint confirmed</p>
-                  <p className="text-white font-bold text-xs">+1 SOL → creator</p>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">Creator keeps</p>
+                  <p className="text-white font-bold text-xs">100% of mint sales</p>
                 </div>
               </div>
             </div>
@@ -366,7 +388,13 @@ export default function HomePage() {
                            border border-white/10 bg-zinc-900
                            hover:border-purple-500/50 transition-colors duration-300"
               >
-                <img src={c.imgSrc} alt={c.imgAlt} className="w-full h-full object-cover" loading="lazy" />
+                <img
+                  src={c.imgSrc}
+                  alt={c.imgAlt}
+                  className="w-full h-full object-cover"
+                  style={c.filter ? { filter: c.filter } : undefined}
+                  loading="lazy"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                 <div className="absolute inset-0" style={{ background: "rgba(20,5,40,0.2)", mixBlendMode: "multiply" }} />
                 <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-white/10">
@@ -390,7 +418,13 @@ export default function HomePage() {
                            border border-white/10 bg-zinc-900
                            hover:border-purple-500/50 transition-colors duration-300"
               >
-                <img src={c.imgSrc} alt={c.imgAlt} className="w-full h-full object-cover" loading="lazy" />
+                <img
+                  src={c.imgSrc}
+                  alt={c.imgAlt}
+                  className="w-full h-full object-cover"
+                  style={c.filter ? { filter: c.filter } : undefined}
+                  loading="lazy"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                 <div className="absolute inset-0" style={{ background: "rgba(20,5,40,0.2)", mixBlendMode: "multiply" }} />
                 <div className="absolute bottom-2 left-2.5 right-2.5">

@@ -181,8 +181,7 @@ export default function HomePage() {
 
         {/* H1 — plus grand, tracking plus serré, gradient amélioré */}
         <h1
-          className="animate-fade-up text-5xl sm:text-6xl md:text-7xl lg:text-8xl
-                     font-extrabold text-white leading-[1.04] max-w-4xl mx-auto tracking-tight"
+          className="animate-fade-up text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-[1.06] max-w-4xl mx-auto tracking-tight"
           style={{ animationDelay: "80ms" }}
         >
           Launch Your Solana NFT

@@ -3,83 +3,96 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════════════════
-   ROOT VARIABLES — Solana brand palette
+   ROOT — Solana brand palette
    ══════════════════════════════════════════════════════════════════════ */
 :root {
   --background: #0a0a0a;
   --foreground: #ffffff;
-
-  /* Solana brand gradient stops */
   --sol-violet: #9945FF;
   --sol-violet-deep: #7c3aed;
+  --sol-violet-light: #a855f7;
   --sol-green: #14F195;
   --sol-blue: #3b82f6;
-
-  /* Glass surface */
-  --glass-bg: rgba(20, 20, 26, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-border-hover: rgba(153, 69, 255, 0.35);
 }
 
-/* ── Reset ─────────────────────────────────────────── */
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+* { box-sizing: border-box; padding: 0; margin: 0; }
 
-html,
-body {
+html, body {
   max-width: 100vw;
   overflow-x: hidden;
-  background: #0a0a0a;
+  background: #050505;
   color: #ffffff;
-  /* Premium font smoothing */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  letter-spacing: -0.011em;
+  letter-spacing: -0.012em;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   AMBIENT BACKGROUND — subtle radial gradients for depth
-   Fixed layer behind all content, no performance cost
+   ANIMATED MESH GRADIENT — Living background with floating blobs
    ══════════════════════════════════════════════════════════════════════ */
 body::before {
+  content: "";
+  position: fixed;
+  inset: -20vh -20vw;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 20%,  rgba(153, 69, 255, 0.45) 0%, transparent 35%),
+    radial-gradient(circle at 85% 15%,  rgba(59, 130, 246, 0.32) 0%, transparent 38%),
+    radial-gradient(circle at 80% 85%,  rgba(124, 58, 237, 0.40) 0%, transparent 38%),
+    radial-gradient(circle at 10% 80%,  rgba(20, 241, 149, 0.18) 0%, transparent 36%),
+    radial-gradient(circle at 50% 50%,  rgba(168, 85, 247, 0.12) 0%, transparent 50%);
+  filter: blur(80px) saturate(140%);
+  animation: meshDrift 30s ease-in-out infinite alternate;
+}
+
+/* Grid pattern overlay — Linear/Vercel/Stripe signature */
+body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 75% 55% at 10% -5%, rgba(153, 69, 255, 0.32) 0%, transparent 55%),
-    radial-gradient(ellipse 65% 50% at 92% 8%, rgba(59, 130, 246, 0.24) 0%, transparent 55%),
-    radial-gradient(ellipse 80% 60% at 5% 100%, rgba(124, 58, 237, 0.26) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 45% at 95% 95%, rgba(20, 241, 149, 0.14) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(153, 69, 255, 0.06) 0%, transparent 70%);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 0%, transparent 75%);
+}
+
+@keyframes meshDrift {
+  0%   { transform: translate3d(0%,   0%, 0) scale(1);    }
+  33%  { transform: translate3d(-3%,  2%, 0) scale(1.05); }
+  66%  { transform: translate3d(3%,  -2%, 0) scale(0.98); }
+  100% { transform: translate3d(0%,   0%, 0) scale(1.04); }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   SCROLLBAR — thin, gradient thumb
+   SCROLLBAR
    ══════════════════════════════════════════════════════════════════════ */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #050505; }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #9945FF 0%, #7c3aed 100%);
+  background: linear-gradient(180deg, #9945FF 0%, #14F195 100%);
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #a855f7 0%, #9945FF 100%);
-}
 
-/* ── Selection ────────────────────────────────── */
-::selection { background: rgba(153, 69, 255, 0.35); color: #ffffff; }
+::selection { background: rgba(153, 69, 255, 0.4); color: #ffffff; }
 
 /* ══════════════════════════════════════════════════════════════════════
-   GRADIENT TEXT UTILITY
+   GRADIENT TEXT
    ══════════════════════════════════════════════════════════════════════ */
 .gradient-text {
-  background: linear-gradient(135deg, #a78bfa 0%, #c084fc 50%, #818cf8 100%);
+  background: linear-gradient(135deg, #a78bfa 0%, #c084fc 40%, #818cf8 80%, #14F195 120%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-solana {
+  background: linear-gradient(100deg, #9945FF 0%, #14F195 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -87,7 +100,6 @@ body::before {
 
 /* ══════════════════════════════════════════════════════════════════════
    PRIMARY BUTTON — Electric Solana gradient
-   Violet → deep violet → green subtle tail, shifts on hover + glow
    ══════════════════════════════════════════════════════════════════════ */
 .btn-primary {
   @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white rounded-xl overflow-hidden;
@@ -115,52 +127,85 @@ body::before {
 .btn-primary:active { transform: translateY(0); }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
+/* Shine sweep on hover */
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.22) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.btn-primary:hover::after { transform: translateX(100%); }
+
 /* ══════════════════════════════════════════════════════════════════════
-   GHOST BUTTON — Glass surface, purple border on hover
+   GHOST BUTTON — Glass surface
    ══════════════════════════════════════════════════════════════════════ */
 .btn-ghost {
   @apply inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white rounded-xl;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .btn-ghost:hover {
   background: rgba(153, 69, 255, 0.08);
-  border-color: rgba(153, 69, 255, 0.45);
-  transform: translateY(-1px);
-  box-shadow: 0 0 24px rgba(153, 69, 255, 0.15);
+  border-color: rgba(153, 69, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 0 32px rgba(153, 69, 255, 0.20);
 }
 .btn-ghost:active { transform: translateY(0); }
 .btn-ghost:disabled { @apply opacity-40 cursor-not-allowed; transform: none; box-shadow: none; }
 
 /* ══════════════════════════════════════════════════════════════════════
-   CARD — Premium glassmorphism
-   Translucent + blur + saturate for Apple-like frosted glass
+   GLASS CARD
    ══════════════════════════════════════════════════════════════════════ */
 .card {
   border-radius: 1rem;
-  background: rgba(24, 24, 32, 0.45);
-  border: 1px solid rgba(153, 69, 255, 0.14);
+  background: rgba(18, 18, 24, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: border-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
               background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
               transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
               box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Gradient border card — premium accent variant */
+.card-gradient-border {
+  position: relative;
+  border-radius: 1.25rem;
+  background: rgba(18, 18, 24, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+.card-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(153,69,255,0.5) 0%, rgba(20,241,149,0.3) 50%, rgba(59,130,246,0.4) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
 /* ══════════════════════════════════════════════════════════════════════
-   INPUT — Glass input with purple focus glow
+   INPUT
    ══════════════════════════════════════════════════════════════════════ */
 .input {
   @apply w-full rounded-xl px-4 py-3 text-white text-sm;
-  background: rgba(20, 20, 26, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(18, 18, 24, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
@@ -168,42 +213,128 @@ body::before {
 .input::placeholder { color: rgba(161, 161, 170, 0.6); }
 .input:focus {
   outline: none;
-  border-color: rgba(153, 69, 255, 0.55);
-  background: rgba(20, 20, 26, 0.8);
+  border-color: rgba(153, 69, 255, 0.6);
+  background: rgba(18, 18, 24, 0.85);
   box-shadow:
-    0 0 0 3px rgba(153, 69, 255, 0.15),
-    0 0 24px rgba(153, 69, 255, 0.12);
+    0 0 0 3px rgba(153, 69, 255, 0.18),
+    0 0 28px rgba(153, 69, 255, 0.15);
 }
-.input:hover:not(:focus) {
-  border-color: rgba(255, 255, 255, 0.14);
-}
+.input:hover:not(:focus) { border-color: rgba(255, 255, 255, 0.18); }
 
 /* ══════════════════════════════════════════════════════════════════════
-   PURPLE GLOW — soft ambient glow utility
+   GLOW UTILITIES
    ══════════════════════════════════════════════════════════════════════ */
 .glow-purple {
   box-shadow:
-    0 0 40px rgba(153, 69, 255, 0.14),
-    0 0 80px rgba(168, 85, 247, 0.06);
+    0 0 40px rgba(153, 69, 255, 0.18),
+    0 0 80px rgba(168, 85, 247, 0.08);
+}
+
+.glow-solana {
+  box-shadow:
+    0 0 40px rgba(153, 69, 255, 0.25),
+    0 0 80px rgba(20, 241, 149, 0.10);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   FADE ANIMATIONS
+   FADE / REVEAL ANIMATIONS
    ══════════════════════════════════════════════════════════════════════ */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0);    }
 }
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+.animate-fade-up { animation: fadeInUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in { animation: fadeIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-.animate-fade-up {
-  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+/* ══════════════════════════════════════════════════════════════════════
+   FLOATING NFT CARD — Hero side visual
+   ══════════════════════════════════════════════════════════════════════ */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-14px) rotate(-2deg); }
+}
+@keyframes floatY2 {
+  0%, 100% { transform: translateY(0) rotate(4deg); }
+  50%      { transform: translateY(-18px) rotate(5deg); }
+}
+@keyframes floatY3 {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-10px) rotate(0deg); }
+}
+.float-1 { animation: floatY  6s ease-in-out infinite; }
+.float-2 { animation: floatY2 7s ease-in-out infinite; }
+.float-3 { animation: floatY3 5.5s ease-in-out infinite; }
+
+/* Pulsing glow behind the hero NFT stack */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.08); }
+}
+.pulse-glow { animation: pulseGlow 4s ease-in-out infinite; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   MARQUEE — Infinite horizontal scroll (Stripe/Vercel style)
+   ══════════════════════════════════════════════════════════════════════ */
+@keyframes marqueeLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marqueeRight {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.marquee-track-left  { animation: marqueeLeft  40s linear infinite; }
+.marquee-track-right { animation: marqueeRight 45s linear infinite; }
+
+.marquee-mask {
+  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+/* ══════════════════════════════════════════════════════════════════════
+   NUMBER GLOW — Stats geants
+   ══════════════════════════════════════════════════════════════════════ */
+.stat-number {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  text-shadow: 0 0 60px rgba(153, 69, 255, 0.3);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TILT / 3D HOVER for featured NFT cards
+   ══════════════════════════════════════════════════════════════════════ */
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tilt-card:hover {
+  transform: perspective(1000px) rotateX(4deg) rotateY(-6deg) translateY(-6px) scale(1.015);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ACCORDION — FAQ section
+   ══════════════════════════════════════════════════════════════════════ */
+details.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+}
+details.faq-item summary::-webkit-details-marker { display: none; }
+details.faq-item[open] summary .faq-chevron { transform: rotate(180deg); }
+details.faq-item .faq-chevron {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SECTION DIVIDER — Premium horizontal line with glow
+   ══════════════════════════════════════════════════════════════════════ */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(153,69,255,0.4) 20%, rgba(20,241,149,0.3) 50%, rgba(59,130,246,0.4) 80%, transparent 100%);
+  max-width: 60%;
+  margin: 0 auto;
 }

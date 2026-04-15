@@ -52,10 +52,11 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 60% 45% at 15% 0%, rgba(153, 69, 255, 0.12) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 40% at 85% 5%, rgba(59, 130, 246, 0.10) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 50% at 10% 100%, rgba(124, 58, 237, 0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 35% at 90% 95%, rgba(20, 241, 149, 0.05) 0%, transparent 60%);
+    radial-gradient(ellipse 75% 55% at 10% -5%, rgba(153, 69, 255, 0.32) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 50% at 92% 8%, rgba(59, 130, 246, 0.24) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 5% 100%, rgba(124, 58, 237, 0.26) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 95% 95%, rgba(20, 241, 149, 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(153, 69, 255, 0.06) 0%, transparent 70%);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -90,24 +91,26 @@ body::before {
    ══════════════════════════════════════════════════════════════════════ */
 .btn-primary {
   @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold text-white rounded-xl overflow-hidden;
-  background: linear-gradient(120deg, #9945FF 0%, #7c3aed 45%, #a855f7 75%, #14F195 140%);
-  background-size: 200% 100%;
+  background: linear-gradient(120deg, #9945FF 0%, #7c3aed 40%, #a855f7 65%, #14F195 120%);
+  background-size: 220% 100%;
   background-position: 0% 0%;
-  transition: background-position 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+  transition: background-position 0.5s cubic-bezier(0.22, 1, 0.36, 1),
               transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
               box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
               opacity 0.3s ease;
   box-shadow:
-    0 4px 16px rgba(124, 58, 237, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    0 6px 20px rgba(153, 69, 255, 0.40),
+    0 0 32px rgba(153, 69, 255, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
 }
 .btn-primary:hover {
-  background-position: 70% 0%;
-  transform: translateY(-1px);
+  background-position: 75% 0%;
+  transform: translateY(-2px);
   box-shadow:
-    0 6px 24px rgba(153, 69, 255, 0.45),
-    0 0 40px rgba(153, 69, 255, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    0 10px 32px rgba(153, 69, 255, 0.60),
+    0 0 56px rgba(153, 69, 255, 0.40),
+    0 0 80px rgba(20, 241, 149, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
 }
 .btn-primary:active { transform: translateY(0); }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
@@ -138,10 +141,13 @@ body::before {
    ══════════════════════════════════════════════════════════════════════ */
 .card {
   border-radius: 1rem;
-  background: rgba(20, 20, 26, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  background: rgba(24, 24, 32, 0.45);
+  border: 1px solid rgba(153, 69, 255, 0.14);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   transition: border-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
               background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
               transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),

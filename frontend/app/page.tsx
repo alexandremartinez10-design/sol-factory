@@ -78,10 +78,10 @@ const ROYALTY_POINTS = [
 // ── Featured collections ──────────────────────────────────────────────────────
 
 const FEATURED = [
-  { name: "Lunar Eclipse", symbol: "LUNA", supply: "500", imgSrc: "/lunar-eclipse.png.jpg", imgAlt: "Lunar Eclipse NFT" },
-  { name: "Arcane Circle", symbol: "ARCN", supply: "200", imgSrc: "/arcane-circle.png.jpg", imgAlt: "Arcane Circle NFT" },
-  { name: "Crystal Spirit", symbol: "CRYS", supply: "300", imgSrc: "/crystal-spirit.png.jpg", imgAlt: "Crystal Spirit NFT" },
-  { name: "Neon Phantom", symbol: "NPHM", supply: "500", imgSrc: "/neon-phantom.png.jpg", imgAlt: "Neon Phantom NFT" },
+  { name: "Lunar Eclipse", symbol: "LUNA", supply: "500", imgSrc: "/lunar-eclipse-v2.jpg", imgAlt: "Lunar Eclipse NFT" },
+  { name: "Arcane Circle", symbol: "ARCN", supply: "200", imgSrc: "/arcane-circle-v2.jpg", imgAlt: "Arcane Circle NFT" },
+  { name: "Crystal Spirit", symbol: "CRYS", supply: "300", imgSrc: "/crystal-spirit-v2.jpg", imgAlt: "Crystal Spirit NFT" },
+  { name: "Neon Phantom", symbol: "NPHM", supply: "500", imgSrc: "/neon-phantom-v2.jpg", imgAlt: "Neon Phantom NFT" },
   { name: "Aurora Wolves", symbol: "AWLF", supply: "200", imgSrc: "/aurora-wolves.png.jpg", imgAlt: "Aurora Wolves NFT" },
   { name: "Legendary Skin Pass", symbol: "LGND", supply: "100", imgSrc: "/legendary-skin-pass.png.jpg", imgAlt: "Legendary Skin Pass NFT" },
 ];
@@ -99,12 +99,12 @@ type MarqueeItem = {
   filter?: string;
 };
 const MARQUEE_EXTRA: MarqueeItem[] = [
-  { name: "Urban Patchwork",          symbol: "DRIP",  supply: "300", imgSrc: "/clothes art.png.jpg",                       imgAlt: "Urban Patchwork NFT — NYC street fashion collection" },
-  { name: "Surreal Circus",           symbol: "DALI",  supply: "200", imgSrc: "/dali art.png.jpg",                          imgAlt: "Surreal Circus NFT — Dali-inspired surrealist collection" },
-  { name: "8-Bit Solana",             symbol: "8BIT",  supply: "500", imgSrc: "/give away.png.jpeg",                        imgAlt: "8-Bit Solana NFT — pixel art Solana logo collection" },
-  { name: "White Ghost",              symbol: "WHGT",  supply: "150", imgSrc: "/nebula.png.jpg",                            imgAlt: "White Ghost NFT — futuristic white mask collection" },
-  { name: "Coastal Strokes",          symbol: "CSTL",  supply: "200", imgSrc: "/sea.png.jpg",                               imgAlt: "Coastal Strokes NFT — impressionist seascape collection" },
-  { name: "Sharks × Elephants WAGMI", symbol: "WAGMI", supply: "420", imgSrc: "/sharks!!!elephants!!!wagmi!!!.png.PNG",     imgAlt: "Sharks x Elephants WAGMI NFT — surreal meme collection" },
+  { name: "Urban Patchwork",          symbol: "DRIP",  supply: "300", imgSrc: "/urban-patchwork.jpg",        imgAlt: "Urban Patchwork NFT — NYC street fashion collection" },
+  { name: "Surreal Circus",           symbol: "DALI",  supply: "200", imgSrc: "/surreal-circus.jpg",         imgAlt: "Surreal Circus NFT — Dali-inspired surrealist collection" },
+  { name: "8-Bit Solana",             symbol: "8BIT",  supply: "500", imgSrc: "/8bit-solana.jpg",            imgAlt: "8-Bit Solana NFT — pixel art Solana logo collection" },
+  { name: "White Ghost",              symbol: "WHGT",  supply: "150", imgSrc: "/white-ghost.jpg",            imgAlt: "White Ghost NFT — futuristic white mask collection" },
+  { name: "Coastal Strokes",          symbol: "CSTL",  supply: "200", imgSrc: "/coastal-strokes.jpg",        imgAlt: "Coastal Strokes NFT — impressionist seascape collection" },
+  { name: "Sharks × Elephants WAGMI", symbol: "WAGMI", supply: "420", imgSrc: "/sharks-elephants-wagmi.png", imgAlt: "Sharks x Elephants WAGMI NFT — surreal meme collection" },
 ];
 
 // Combine then duplicate for infinite scroll. 12 unique looks × 2 = 24 tiles.

@@ -373,9 +373,12 @@ export default function HomePage() {
           MARQUEE — Collections live, infinite scroll
       ══════════════════════════════════════════════════════════════════════ */}
       <section className="py-10 overflow-hidden">
-        <div className="text-center mb-10">
+        <div className="text-center mb-10 space-y-2">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-purple-400">
             Collections launching on SolFactory
+          </p>
+          <p className="text-[11px] text-zinc-600 italic">
+            Illustrative examples — not real live collections
           </p>
         </div>
 

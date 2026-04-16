@@ -87,10 +87,9 @@ const FEATURED = [
 ];
 
 // ── Marquee extended set ──────────────────────────────────────────────────────
-// We add 6 "variant" collections based on the same 6 images but with CSS
-// hue-rotate + saturate filters applied. Different names, different look —
-// gives the perception of 12 unique collections on the marquee without
-// requiring new NFT image assets. Replace with real images later.
+// 6 additional collections using their own dedicated images (no more CSS
+// filter tricks). Together with FEATURED this gives 12 unique looks × 2 = 24
+// tiles on the infinite-scroll marquee.
 type MarqueeItem = {
   name: string;
   symbol: string;
@@ -100,12 +99,12 @@ type MarqueeItem = {
   filter?: string;
 };
 const MARQUEE_EXTRA: MarqueeItem[] = [
-  { name: "Mystic Realms",   symbol: "MYST", supply: "250", imgSrc: "/lunar-eclipse.png.jpg",      imgAlt: "Mystic Realms",   filter: "hue-rotate(80deg) saturate(1.3)" },
-  { name: "Void Runners",    symbol: "VOID", supply: "400", imgSrc: "/arcane-circle.png.jpg",      imgAlt: "Void Runners",    filter: "hue-rotate(180deg) saturate(1.2)" },
-  { name: "Ember Ascend",    symbol: "EMBR", supply: "150", imgSrc: "/crystal-spirit.png.jpg",     imgAlt: "Ember Ascend",    filter: "hue-rotate(-40deg) saturate(1.4) brightness(1.05)" },
-  { name: "Cyber Nomads",    symbol: "CYBR", supply: "333", imgSrc: "/neon-phantom.png.jpg",       imgAlt: "Cyber Nomads",    filter: "hue-rotate(120deg) saturate(1.3)" },
-  { name: "Frost Covenant",  symbol: "FRST", supply: "220", imgSrc: "/aurora-wolves.png.jpg",      imgAlt: "Frost Covenant",  filter: "hue-rotate(-60deg) saturate(0.9) brightness(1.1)" },
-  { name: "Obsidian Cult",   symbol: "OBSD", supply: "180", imgSrc: "/legendary-skin-pass.png.jpg", imgAlt: "Obsidian Cult",   filter: "hue-rotate(220deg) saturate(1.2)" },
+  { name: "Urban Patchwork",          symbol: "DRIP",  supply: "300", imgSrc: "/clothes art.png.jpg",                       imgAlt: "Urban Patchwork NFT — NYC street fashion collection" },
+  { name: "Surreal Circus",           symbol: "DALI",  supply: "200", imgSrc: "/dali art.png.jpg",                          imgAlt: "Surreal Circus NFT — Dali-inspired surrealist collection" },
+  { name: "8-Bit Solana",             symbol: "8BIT",  supply: "500", imgSrc: "/give away.png.jpeg",                        imgAlt: "8-Bit Solana NFT — pixel art Solana logo collection" },
+  { name: "White Ghost",              symbol: "WHGT",  supply: "150", imgSrc: "/nebula.png.jpg",                            imgAlt: "White Ghost NFT — futuristic white mask collection" },
+  { name: "Coastal Strokes",          symbol: "CSTL",  supply: "200", imgSrc: "/sea.png.jpg",                               imgAlt: "Coastal Strokes NFT — impressionist seascape collection" },
+  { name: "Sharks × Elephants WAGMI", symbol: "WAGMI", supply: "420", imgSrc: "/sharks!!!elephants!!!wagmi!!!.png.PNG",     imgAlt: "Sharks x Elephants WAGMI NFT — surreal meme collection" },
 ];
 
 // Combine then duplicate for infinite scroll. 12 unique looks × 2 = 24 tiles.
